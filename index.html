@@ -1,454 +1,812 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Age of Empires II DE - Clicker</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;900&family=Marcellus&display=swap" rel="stylesheet">
-  <style>
-    * {
-      box-sizing: border-box;
-      user-select: none;
-      -webkit-user-select: none;
-      margin: 0;
-      padding: 0;
-    }
-    body {
-      background-color: #0b0d10;
-      color: #e0d5c1;
-      font-family: 'Marcellus', serif;
-      height: 100vh;
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-      background-image: radial-gradient(circle at center, rgba(30, 24, 16, 0.8) 0%, rgba(5, 5, 8, 0.95) 100%);
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Age of Empires II: DE Clicker</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800;900&family=Marcellus&display=swap" rel="stylesheet">
 
-    /* Верхняя панель HUD */
-    .hud {
-      background: linear-gradient(180deg, #2a1f14 0%, #17110c 100%);
-      border-bottom: 3px solid #8c6f3d;
-      padding: 10px 20px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.8);
-      z-index: 10;
-    }
-    .res-box {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      background: rgba(0,0,0,0.5);
-      border: 1px solid #5a4525;
-      padding: 6px 14px;
-      border-radius: 4px;
-    }
-    .res-icon {
-      width: 28px;
-      height: 28px;
-      filter: drop-shadow(0 2px 4px rgba(0,0,0,0.8));
-    }
-    .res-value {
-      font-family: 'Cinzel', serif;
-      font-size: 1.3rem;
-      font-weight: 700;
-      color: #f1d591;
-      text-shadow: 0 2px 4px #000;
-    }
-    .level-badge {
-      font-family: 'Cinzel', serif;
-      background: linear-gradient(135deg, #a81c1c 0%, #5e0d0d 100%);
-      border: 2px solid #e5b35c;
-      color: #fff;
-      padding: 4px 12px;
-      border-radius: 20px;
-      font-weight: 700;
-      font-size: 0.9rem;
-      box-shadow: 0 0 10px rgba(229,179,92,0.3);
-    }
+    <style>
+        * {
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-user-select: none;
+            margin: 0;
+            padding: 0;
+        }
 
-    /* Основной контент */
-    .main-container {
-      flex: 1;
-      display: flex;
-      flex-direction: row;
-      height: calc(100vh - 65px);
-    }
+        body {
+            font-family: 'Marcellus', serif;
+            overflow-x: hidden;
+            background-color: #0b0907;
+            background-image: radial-gradient(circle at center, #261b12 0%, #0b0907 70%);
+            color: #fef3c7;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
 
-    @media (max-width: 800px) {
-      .main-container {
-        flex-direction: column;
-        overflow-y: auto;
-      }
-    }
+        .font-cinzel {
+            font-family: 'Cinzel', serif;
+        }
 
-    /* Зона кликера */
-    .click-zone {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      position: relative;
-      padding: 20px;
-    }
+        /* Панели в стиле Средневековья */
+        .aoe-panel {
+            background: linear-gradient(180deg, #2a1f18 0%, #17100b 100%);
+            border: 3px solid #8e6d3b;
+            box-shadow: inset 0 0 10px #000, 0 8px 20px rgba(0,0,0,0.8);
+            border-radius: 8px;
+            position: relative;
+        }
 
-    /* Прогресс эволюции */
-    .unit-progress-container {
-      width: 80%;
-      max-width: 320px;
-      background: rgba(0,0,0,0.6);
-      border: 1px solid #5a4525;
-      padding: 8px;
-      border-radius: 6px;
-      margin-bottom: 20px;
-      text-align: center;
-    }
-    .unit-title {
-      font-family: 'Cinzel', serif;
-      color: #e5b35c;
-      font-size: 1.1rem;
-      font-weight: 700;
-      margin-bottom: 5px;
-    }
-    .progress-bar-bg {
-      background: #15110d;
-      height: 12px;
-      border-radius: 6px;
-      overflow: hidden;
-      border: 1px solid #3d2f1b;
-    }
-    .progress-bar-fill {
-      height: 100%;
-      width: 0%;
-      background: linear-gradient(90deg, #b83232 0%, #e5933c 100%);
-      transition: width 0.2s ease;
-    }
-    .progress-text {
-      font-size: 0.8rem;
-      color: #a09382;
-      margin-top: 4px;
-    }
+        .aoe-panel::before {
+            content: '';
+            position: absolute;
+            top: 2px; left: 2px; right: 2px; bottom: 2px;
+            border: 1px solid #d4af37;
+            pointer-events: none;
+            border-radius: 5px;
+            opacity: 0.5;
+        }
 
-    /* Кнопка с воином */
-    .warrior-btn {
-      width: 220px;
-      height: 220px;
-      border-radius: 50%;
-      background: radial-gradient(circle at 30% 30%, #d92b2b 0%, #700b0b 70%, #3a0000 100%);
-      border: 6px solid #e5b35c;
-      box-shadow: 0 0 30px rgba(184, 50, 50, 0.5), inset 0 0 15px rgba(0,0,0,0.6);
-      cursor: pointer;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      transition: transform 0.05s ease, box-shadow 0.1s ease;
-      position: relative;
-      outline: none;
-    }
-    .warrior-btn:active {
-      transform: scale(0.95);
-      box-shadow: 0 0 15px rgba(184, 50, 50, 0.8);
-    }
-    .warrior-icon {
-      width: 110px;
-      height: 110px;
-      filter: drop-shadow(0 4px 8px rgba(0,0,0,0.8));
-      pointer-events: none;
-    }
-    .warrior-name {
-      font-family: 'Cinzel', serif;
-      font-weight: 700;
-      color: #fff;
-      margin-top: 8px;
-      font-size: 1rem;
-      text-shadow: 0 2px 4px #000;
-      pointer-events: none;
-    }
+        /* Шапка HUD */
+        .aoe-header {
+            background: linear-gradient(180deg, #423223 0%, #1f160e 100%);
+            border-bottom: 3px solid #c8a050;
+            padding: 12px 20px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.8);
+        }
 
-    /* Вылетающие цифры */
-    .floating-text {
-      position: absolute;
-      font-family: 'Cinzel', serif;
-      font-weight: 900;
-      font-size: 1.8rem;
-      color: #ffd700;
-      text-shadow: 0 2px 5px #000, 0 0 10px #ff0000;
-      pointer-events: none;
-      animation: floatUp 0.8s ease-out forwards;
-      z-index: 100;
-    }
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 15px;
+        }
 
-    @keyframes floatUp {
-      0% { opacity: 1; transform: translateY(0) scale(1); }
-      100% { opacity: 0; transform: translateY(-70px) scale(1.3); }
-    }
+        .player-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
 
-    /* Правая панель улучшений */
-    .shop-panel {
-      width: 360px;
-      background: linear-gradient(180deg, #1c150f 0%, #0f0b08 100%);
-      border-left: 3px solid #5a4525;
-      display: flex;
-      flex-direction: column;
-      padding: 15px;
-      gap: 12px;
-      overflow-y: auto;
-    }
+        .level-badge {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            border: 2px solid #f5c842;
+            background: #5c1d0e;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fcd34d;
+            font-size: 1.25rem;
+            font-weight: 900;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.8);
+        }
 
-    @media (max-width: 800px) {
-      .shop-panel {
-        width: 100%;
-        border-left: none;
-        border-top: 3px solid #5a4525;
-      }
-    }
+        .game-title {
+            font-size: 1.15rem;
+            font-weight: 800;
+            color: #fcd34d;
+            letter-spacing: 1px;
+        }
 
-    .shop-header {
-      font-family: 'Cinzel', serif;
-      color: #e5b35c;
-      font-size: 1.2rem;
-      text-align: center;
-      padding-bottom: 8px;
-      border-bottom: 1px solid #3d2f1b;
-      font-weight: 700;
-    }
+        .resources-box {
+            display: flex;
+            align-items: center;
+            gap: 25px;
+            background: rgba(0, 0, 0, 0.55);
+            padding: 8px 20px;
+            border-radius: 8px;
+            border: 1px solid rgba(142, 109, 59, 0.6);
+        }
 
-    .upgrade-card {
-      background: rgba(42, 31, 20, 0.6);
-      border: 1px solid #4a381e;
-      border-radius: 6px;
-      padding: 10px;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      transition: background 0.2s ease;
-    }
-    .upgrade-card:hover {
-      background: rgba(60, 44, 28, 0.8);
-    }
-    .upgrade-icon {
-      width: 44px;
-      height: 44px;
-      background: #110d0a;
-      border: 1px solid #8c6f3d;
-      border-radius: 4px;
-      padding: 4px;
-      flex-shrink: 0;
-    }
-    .upgrade-info {
-      flex: 1;
-    }
-    .upgrade-title {
-      font-family: 'Cinzel', serif;
-      color: #f1d591;
-      font-size: 0.95rem;
-      font-weight: 700;
-    }
-    .upgrade-desc {
-      font-size: 0.75rem;
-      color: #a09382;
-      margin-top: 2px;
-    }
-    .upgrade-btn {
-      background: linear-gradient(180deg, #42782c 0%, #244717 100%);
-      border: 1px solid #72b852;
-      color: #fff;
-      font-family: 'Cinzel', serif;
-      font-weight: 700;
-      padding: 8px 12px;
-      border-radius: 4px;
-      cursor: pointer;
-      font-size: 0.8rem;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.5);
-    }
-    .upgrade-btn:disabled {
-      background: #222;
-      border-color: #444;
-      color: #666;
-      cursor: not-allowed;
-      box-shadow: none;
-    }
+        .res-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
 
-    /* Панель файлов сохранения */
-    .save-section {
-      margin-top: auto;
-      padding-top: 15px;
-      border-top: 1px solid #3d2f1b;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-    .save-btn-group {
-      display: flex;
-      gap: 8px;
-    }
-    .action-btn {
-      flex: 1;
-      background: #2a1f14;
-      border: 1px solid #5a4525;
-      color: #d1c2a5;
-      padding: 8px;
-      font-size: 0.75rem;
-      border-radius: 4px;
-      cursor: pointer;
-      font-family: 'Marcellus', serif;
-      text-align: center;
-      transition: all 0.2s;
-    }
-    .action-btn:hover {
-      background: #3d2f1b;
-      color: #fff;
-    }
-    .action-btn.danger {
-      border-color: #802020;
-      color: #e57373;
-    }
-    .action-btn.danger:hover {
-      background: #4a1515;
-    }
-    .file-input-hidden {
-      display: none;
-    }
-  </style>
+        .res-label {
+            font-size: 0.65rem;
+            color: #d4af37;
+            text-transform: uppercase;
+            font-weight: bold;
+        }
+
+        .res-val {
+            font-size: 1.1rem;
+            font-weight: 800;
+            color: #fef08a;
+        }
+
+        /* Главная зона */
+        .main-layout {
+            max-width: 1200px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 20px;
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+            flex: 1;
+            align-items: center;
+        }
+
+        @media (min-width: 900px) {
+            .main-layout {
+                grid-template-columns: 7fr 5fr;
+            }
+        }
+
+        /* Кликер */
+        .clicker-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+
+        .unit-card {
+            padding: 10px 25px;
+            margin-bottom: 10px;
+            width: 100%;
+            max-width: 340px;
+        }
+
+        /* БЛОК МЕДАЛЕЙ */
+        .medals-container {
+            width: 100%;
+            max-width: 480px;
+            padding: 8px 12px;
+            margin-bottom: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .medals-title {
+            font-size: 0.7rem;
+            color: #d4af37;
+            font-weight: bold;
+            margin-bottom: 6px;
+            letter-spacing: 1px;
+        }
+
+        .medals-grid {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .medal-slot {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            border: 2px solid #5a4225;
+            background: #120a06;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            box-shadow: inset 0 2px 5px rgba(0,0,0,0.8);
+            transition: all 0.2s ease;
+        }
+
+        .medal-slot.unlocked {
+            border-color: #f5c842;
+            background: radial-gradient(circle, #854d0e 0%, #2a1f18 100%);
+            box-shadow: 0 0 10px rgba(245, 200, 66, 0.5), inset 0 0 5px rgba(255, 255, 255, 0.4);
+        }
+
+        .medal-slot .medal-svg {
+            width: 20px;
+            height: 20px;
+            filter: drop-shadow(0 1px 2px rgba(0,0,0,0.8));
+        }
+
+        .medal-slot.locked {
+            opacity: 0.4;
+            color: #666;
+            font-size: 0.75rem;
+        }
+
+        /* Подсказка при наведении на медаль */
+        .medal-slot:hover::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: 110%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #17100b;
+            border: 1px solid #d4af37;
+            color: #fef08a;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.65rem;
+            white-space: nowrap;
+            z-index: 200;
+            pointer-events: none;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.8);
+        }
+
+        /* КРАСНАЯ КНОПКА */
+        .red-click-btn {
+            width: 220px;
+            height: 220px;
+            border-radius: 50%;
+            background: radial-gradient(circle, #e62323 0%, #a80f0f 60%, #570000 100%);
+            border: 6px solid #f5c842;
+            box-shadow: 0 0 35px rgba(230, 35, 35, 0.6), inset 0 4px 10px rgba(255, 255, 255, 0.4), inset 0 -6px 15px rgba(0, 0, 0, 0.7);
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            outline: none;
+            transition: transform 0.08s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            margin: 5px 0;
+        }
+
+        .red-click-btn:active {
+            transform: scale(0.95);
+            box-shadow: 0 0 15px rgba(200, 0, 0, 0.9), inset 0 6px 15px rgba(0, 0, 0, 0.9);
+        }
+
+        .unit-svg {
+            width: 95px;
+            height: 95px;
+            pointer-events: none;
+        }
+
+        /* Вылетающий текст */
+        .float-text {
+            position: absolute;
+            pointer-events: none;
+            animation: floatUp 0.85s ease-out forwards;
+            font-family: 'Cinzel', serif;
+            font-weight: 900;
+            font-size: 1.3rem;
+            color: #f5c842;
+            text-shadow: 2px 2px 0 #000, -2px -2px 0 #000, 0 0 8px rgba(245, 200, 66, 0.8);
+            z-index: 100;
+        }
+
+        @keyframes floatUp {
+            0% { opacity: 1; transform: translateY(0) scale(1); }
+            50% { transform: translateY(-40px) scale(1.1); }
+            100% { opacity: 0; transform: translateY(-80px) scale(1); }
+        }
+
+        /* Прогресс-бар */
+        .progress-box {
+            width: 100%;
+            max-width: 400px;
+            padding: 12px;
+            margin-top: 10px;
+        }
+
+        .bar-bg {
+            width: 100%;
+            height: 14px;
+            background: rgba(0,0,0,0.7);
+            border-radius: 10px;
+            border: 1px solid #8e6d3b;
+            overflow: hidden;
+            margin-top: 6px;
+        }
+
+        .bar-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #d97706 0%, #f5c842 100%);
+            transition: width 0.15s ease;
+        }
+
+        /* Правая кузница */
+        .forge-section {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        .forge-card {
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            max-height: 520px;
+            height: 100%;
+        }
+
+        .forge-title {
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: #fcd34d;
+            border-bottom: 1px solid #5a4225;
+            padding-bottom: 8px;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .upgrades-list {
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            padding-right: 4px;
+            flex: 1;
+        }
+
+        .upg-item {
+            background: rgba(20, 10, 5, 0.6);
+            border: 1px solid #5a4225;
+            border-radius: 6px;
+            padding: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+        }
+
+        .upg-btn {
+            background: linear-gradient(180deg, #d97706 0%, #92400e 100%);
+            border: 1px solid #f5c842;
+            color: #000;
+            font-weight: 900;
+            font-family: 'Cinzel', serif;
+            font-size: 0.75rem;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.5);
+        }
+
+        .upg-btn:disabled {
+            background: #27272a;
+            border-color: #3f3f46;
+            color: #71717a;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        /* Подвал сохранений */
+        .footer-panel {
+            max-width: 1200px;
+            width: 100%;
+            margin: 10px auto 20px auto;
+            padding: 10px 16px;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            font-size: 0.8rem;
+        }
+
+        .file-btn {
+            background: #2a1f18;
+            border: 1px solid #8e6d3b;
+            color: #fef08a;
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-weight: bold;
+            cursor: pointer;
+            font-family: 'Marcellus', serif;
+        }
+
+        .file-btn:hover {
+            background: #3d2f23;
+        }
+
+        .reset-btn {
+            background: #3b0707;
+            border: 1px solid #851313;
+            color: #fca5a5;
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .reset-btn:hover {
+            background: #500a0a;
+        }
+
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #140d08; }
+        ::-webkit-scrollbar-thumb { background: #6e5027; border-radius: 3px; }
+    </style>
 </head>
 <body>
 
-  <!-- Верхняя панель -->
-  <div class="hud">
-    <div class="res-box">
-      <!-- Иконка Золота -->
-      <svg class="res-icon" viewBox="0 0 24 24">
-        <circle cx="12" cy="12" r="10" fill="#FFD700" stroke="#B8860B" stroke-width="2"/>
-        <path d="M12 6v12M9 9h6M9 15h6" stroke="#8B6508" stroke-width="2" stroke-linecap="round"/>
-      </svg>
-      <div>
-        <div style="font-size: 0.65rem; color: #a09382;">ЗОЛОТО</div>
-        <div class="res-value" id="gold-val">0</div>
-      </div>
-    </div>
+    <!-- ШАПКА -->
+    <header class="aoe-header">
+        <div class="header-content">
+            <div class="player-info">
+                <div class="level-badge font-cinzel" id="playerLevelBadge">1</div>
+                <div>
+                    <div class="game-title font-cinzel">AGE OF EMPIRES II</div>
+                    <div style="font-size: 0.75rem; color: #d4af37;" id="currentAgeText">ТЕМНЫЕ ВЕКА</div>
+                </div>
+            </div>
 
-    <div class="level-badge" id="player-level">УРОВЕНЬ 1 / 20</div>
-
-    <div class="res-box">
-      <div style="text-align: right;">
-        <div style="font-size: 0.65rem; color: #a09382;">ВСЕГО ТАПОВ</div>
-        <div class="res-value" id="taps-val">0</div>
-      </div>
-    </div>
-  </div>
-
-  <div class="main-container">
-    <!-- Игровая зона кликов -->
-    <div class="click-zone" id="click-zone">
-      
-      <div class="unit-progress-container">
-        <div class="unit-title" id="unit-title">Ополченец</div>
-        <div class="progress-bar-bg">
-          <div class="progress-bar-fill" id="progress-fill"></div>
+            <div class="resources-box">
+                <div class="res-item">
+                    <span style="font-size: 1.2rem;">👆</span>
+                    <div>
+                        <div class="res-label">ТАПОВ</div>
+                        <div class="res-val font-cinzel" id="tapCount">0</div>
+                    </div>
+                </div>
+                <div class="res-item">
+                    <span style="font-size: 1.2rem;">🪙</span>
+                    <div>
+                        <div class="res-label">ЗОЛОТО</div>
+                        <div class="res-val font-cinzel" id="goldCount">0</div>
+                    </div>
+                </div>
+            </div>
         </div>
-        <div class="progress-text" id="progress-text">0 / 50 тапов до эволюции</div>
-      </div>
+    </header>
 
-      <!-- Кнопка воина -->
-      <button class="warrior-btn" id="warrior-btn">
-        <div id="warrior-icon-container"></div>
-        <div class="warrior-name" id="warrior-btn-name">ОПОЛЧЕНЕЦ</div>
-      </button>
+    <!-- ИГРОВАЯ ЗОНА -->
+    <main class="main-layout">
+        
+        <!-- КЛИКЕР (СЛЕВА) -->
+        <section class="clicker-section">
+            <div class="aoe-panel unit-card">
+                <div style="font-size: 0.7rem; color: #d4af37; font-weight: bold;">ТЕКУЩИЙ ВОИН</div>
+                <div class="font-cinzel" id="unitTitle" style="font-size: 1.5rem; font-weight: 900; color: #f5c842;">Ополченец</div>
+                <div style="font-size: 0.8rem; color: #e2e8f0; margin-top: 2px;">Сила клика: <span id="clickPowerText" style="color: #fcd34d; font-weight: bold;">+1</span></div>
+            </div>
 
-    </div>
+            <!-- ПАНЕЛЬ МЕДАЛЕЙ ВЫШЕ КНОПКИ -->
+            <div class="aoe-panel medals-container">
+                <div class="medals-title">🏅 БОЕВЫЕ НАГРАДЫ (ОТКРЫТЫЕ ВОИНЫ)</div>
+                <div class="medals-grid" id="medalsGrid"></div>
+            </div>
 
-    <!-- Панель Кузницы -->
-    <div class="shop-panel">
-      <div class="shop-header">КУЗНИЦА И ТЕХНОЛОГИИ</div>
-      
-      <div id="upgrades-list"></div>
+            <!-- КНОПКА АТАКИ -->
+            <button class="red-click-btn" id="mainClickBtn">
+                <div id="unitIconContainer"></div>
+                <div class="font-cinzel" id="btnUnitLabel" style="font-weight: 900; color: #fff; font-size: 1.1rem; margin-top: 4px; pointer-events: none;">ОПОЛЧЕНЕЦ</div>
+                <div style="font-size: 0.65rem; color: #fef08a; pointer-events: none;">КЛИКНИ ДЛЯ АТАКИ</div>
+            </button>
 
-      <!-- Сохранение файлом -->
-      <div class="save-section">
-        <div style="font-size: 0.75rem; color: #8c6f3d; text-align: center; font-weight: bold;">УПРАВЛЕНИЕ СОХРАНЕНИЕМ</div>
-        <div class="save-btn-group">
-          <button class="action-btn" id="export-file-btn">💾 Скачать файл</button>
-          <button class="action-btn" id="import-file-btn">📁 Загрузить файл</button>
+            <div class="aoe-panel progress-box">
+                <div style="display: flex; justify-content: space-between; font-size: 0.75rem; font-weight: bold; color: #fcd34d;">
+                    <span id="nextUnitLabel">Прогресс до Мечника</span>
+                    <span id="progressText">0 / 50 тапов</span>
+                </div>
+                <div class="bar-bg">
+                    <div class="bar-fill" id="progressBar"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- КУЗНИЦА (СПРАВА) -->
+        <section class="forge-section">
+            <div class="aoe-panel forge-card">
+                <div class="forge-title font-cinzel">⚒️ КУЗНИЦА (МАКС. 20)</div>
+                <div class="upgrades-list" id="upgradesList"></div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- ПОДВАЛ СОХРАНЕНИЙ -->
+    <footer class="aoe-panel footer-panel">
+        <div style="font-weight: bold; color: #fcd34d;">💾 Управление сохранением:</div>
+        <div style="display: flex; gap: 8px;">
+            <button class="file-btn" id="exportBtn">📥 Скачать файл</button>
+            <button class="file-btn" id="importBtn">📤 Загрузить файл</button>
+            <button class="reset-btn" id="resetBtn">🗑️ Сброс</button>
+            <input type="file" id="fileInput" style="display: none;" accept=".json">
         </div>
-        <button class="action-btn danger" id="reset-btn">Сбросить прогресс</button>
-        <input type="file" id="file-input" class="file-input-hidden" accept=".json">
-      </div>
-    </div>
-  </div>
+    </footer>
 
-  <script>
-    // Базы Воинов
-    const STAGES = [
-      { minTaps: 0,    name: 'Ополченец',     power: 1,  icon: 'militia' },
-      { minTaps: 50,   name: 'Мечник',        power: 3,  icon: 'swordsman' },
-      { minTaps: 200,  name: 'Лучник',        power: 10, icon: 'archer' },
-      { minTaps: 500,  name: 'Самострельщик', power: 25, icon: 'crossbow' },
-      { minTaps: 750,  name: 'Арбалетчик',    power: 50, icon: 'arbalest' },
-      { minTaps: 1000, name: 'Рыцарь',        power: 100,icon: 'knight' },
-      { minTaps: 2000, name: 'Кавалер',       power: 250,icon: 'cavalier' },
-      { minTaps: 5000, name: 'Паладин',       power: 600,icon: 'paladin' }
-    ];
+    <script>
+        /* ИКОНКИ ВОИНОВ */
+        const UNIT_SVGS = {
+            militia: `<svg class="unit-svg" viewBox="0 0 100 100"><circle cx="50" cy="35" r="18" fill="#e0c097"/><path d="M30 85 C30 55, 70 55, 70 85 Z" fill="#7a6244"/><path d="M68 30 L85 15 L90 20 L73 35 Z" fill="#aaa"/><rect x="45" y="18" width="10" height="3" fill="#e5b35c"/></svg>`,
+            swordsman: `<svg class="unit-svg" viewBox="0 0 100 100"><path d="M30 85 C30 50, 70 50, 70 85 Z" fill="#4a5568"/><circle cx="50" cy="32" r="16" fill="#cbd5e0"/><path d="M20 30 L80 30 L50 8 Z" fill="#a0aec0"/><rect x="48" y="25" width="4" height="50" fill="#e2e8f0"/><rect x="35" y="50" width="30" height="6" fill="#e5b35c"/></svg>`,
+            archer: `<svg class="unit-svg" viewBox="0 0 100 100"><circle cx="50" cy="32" r="16" fill="#e0c097"/><path d="M30 85 C30 55, 70 55, 70 85 Z" fill="#2f7532"/><path d="M25 20 Q60 50 25 80" stroke="#8d5b4c" stroke-width="6" fill="none"/><line x1="25" y1="20" x2="25" y2="80" stroke="#eee" stroke-width="2"/></svg>`,
+            crossbowman: `<svg class="unit-svg" viewBox="0 0 100 100"><path d="M30 85 C30 55, 70 55, 70 85 Z" fill="#3b4a3f"/><circle cx="50" cy="32" r="16" fill="#d2b48c"/><rect x="20" y="45" width="60" height="8" fill="#5c4033"/><rect x="46" y="20" width="8" height="50" fill="#708090"/></svg>`,
+            arbalester: `<svg class="unit-svg" viewBox="0 0 100 100"><path d="M30 85 C30 55, 70 55, 70 85 Z" fill="#2c3e50"/><circle cx="50" cy="32" r="16" fill="#e2e8f0"/><rect x="15" y="42" width="70" height="10" fill="#4a5568"/><rect x="45" y="15" width="10" height="60" fill="#cbd5e0"/></svg>`,
+            knight: `<svg class="unit-svg" viewBox="0 0 100 100"><path d="M25 85 C25 45, 75 45, 75 85 Z" fill="#718096"/><rect x="35" y="20" width="30" height="30" rx="5" fill="#cbd5e0"/><rect x="40" y="30" width="20" height="4" fill="#1a202c"/><path d="M50 5 L60 20 L40 20 Z" fill="#e53e3e"/></svg>`,
+            cavalier: `<svg class="unit-svg" viewBox="0 0 100 100"><path d="M20 85 C20 40, 80 40, 80 85 Z" fill="#2b6cb0"/><rect x="32" y="15" width="36" height="35" rx="5" fill="#e2e8f0"/><polygon points="50,2 65,18 35,18" fill="#dd6b20"/><rect x="38" y="28" width="24" height="5" fill="#1a202c"/></svg>`,
+            paladin: `<svg class="unit-svg" viewBox="0 0 100 100"><path d="M15 85 C15 35, 85 35, 85 85 Z" fill="#d69e2e"/><rect x="30" y="12" width="40" height="38" rx="6" fill="#f7fafc"/><path d="M50 0 L68 18 L32 18 Z" fill="#b83232"/><rect x="36" y="25" width="28" height="6" fill="#742a2a"/><circle cx="50" cy="60" r="8" fill="#d69e2e"/></svg>`,
+            gbeto: `<svg class="unit-svg" viewBox="0 0 100 100"><circle cx="50" cy="32" r="16" fill="#c29b61"/><path d="M25 85 C25 50, 75 50, 75 85 Z" fill="#991b1b"/><path d="M20 40 L40 20 L50 30 L30 50 Z" fill="#fbbf24"/><path d="M65 35 L80 50" stroke="#f59e0b" stroke-width="4" stroke-linecap="round"/></svg>`,
+            teutonic: `<svg class="unit-svg" viewBox="0 0 100 100"><path d="M15 85 C15 30, 85 30, 85 85 Z" fill="#1e293b"/><rect x="32" y="15" width="36" height="36" rx="4" fill="#f8fafc"/><rect x="42" y="25" width="16" height="4" fill="#000"/><rect x="48" y="20" width="4" height="16" fill="#000"/><path d="M50 5 L60 15 L40 15 Z" fill="#b91c1c"/></svg>`,
+            boyar: `<svg class="unit-svg" viewBox="0 0 100 100"><path d="M20 85 C20 40, 80 40, 80 85 Z" fill="#991b1b"/><circle cx="50" cy="30" r="16" fill="#fcd34d"/><path d="M30 15 L70 15 L60 2 Z" fill="#78350f"/><rect x="35" y="45" width="30" height="8" fill="#d97706"/></svg>`,
+            arambai: `<svg class="unit-svg" viewBox="0 0 100 100"><path d="M25 85 C25 45, 75 45, 75 85 Z" fill="#065f46"/><circle cx="50" cy="32" r="16" fill="#e0c097"/><path d="M15 25 L35 10 L40 40 Z" fill="#dc2626"/><path d="M60 40 L85 25 L65 10 Z" fill="#dc2626"/></svg>`,
+            war_elephant: `<svg class="unit-svg" viewBox="0 0 100 100"><path d="M10 85 Q10 30 50 30 Q90 30 90 85 Z" fill="#475569"/><circle cx="30" cy="45" r="5" fill="#000"/><path d="M20 60 Q5 70 15 85" stroke="#f8fafc" stroke-width="6" fill="none"/><rect x="35" y="10" width="30" height="20" rx="3" fill="#b91c1c" stroke="#f5c842" stroke-width="2"/></svg>`,
+            elephant_archer: `<svg class="unit-svg" viewBox="0 0 100 100"><path d="M10 85 Q10 30 50 30 Q90 30 90 85 Z" fill="#334155"/><circle cx="30" cy="45" r="5" fill="#000"/><path d="M20 60 Q5 70 15 85" stroke="#f8fafc" stroke-width="6" fill="none"/><path d="M40 5 L60 25 M60 5 L40 25" stroke="#eab308" stroke-width="3"/><rect x="35" y="10" width="30" height="15" fill="#854d0e"/></svg>`,
+            jaguar: `<svg class="unit-svg" viewBox="0 0 100 100"><circle cx="50" cy="32" r="16" fill="#d97706"/><path d="M25 85 C25 45, 75 45, 75 85 Z" fill="#78350f"/><circle cx="45" cy="28" r="2" fill="#000"/><circle cx="55" cy="28" r="2" fill="#000"/><path d="M30 15 L50 2 L70 15 Z" fill="#b45309"/></svg>`,
+            samurai: `<svg class="unit-svg" viewBox="0 0 100 100"><path d="M20 85 C20 40, 80 40, 80 85 Z" fill="#991b1b"/><rect x="30" y="18" width="40" height="30" fill="#1e293b"/><path d="M20 18 Q50 5 80 18 L50 10 Z" fill="#f5c842"/><rect x="48" y="30" width="4" height="50" fill="#e2e8f0"/></svg>`,
+            longbowman: `<svg class="unit-svg" viewBox="0 0 100 100"><circle cx="50" cy="30" r="16" fill="#e0c097"/><path d="M25 85 C25 50, 75 50, 75 85 Z" fill="#15803d"/><path d="M15 10 Q70 50 15 90" stroke="#854d0e" stroke-width="5" fill="none"/><line x1="15" y1="10" x2="15" y2="90" stroke="#fff" stroke-width="2"/></svg>`,
+            conquistador: `<svg class="unit-svg" viewBox="0 0 100 100"><path d="M15 85 C15 35, 85 35, 85 85 Z" fill="#1e3a8a"/><rect x="32" y="18" width="36" height="30" rx="4" fill="#cbd5e0"/><path d="M20 18 C30 5, 70 5, 80 18 Z" fill="#f5c842"/><rect x="65" y="40" width="30" height="8" fill="#475569"/></svg>`
+        };
 
-    // Улучшения
-    const UPGRADES_DATA = [
-      { id: 'loom',     name: 'Ткацкий станок',  baseCost: 15,   addPower: 1,  icon: 'loom' },
-      { id: 'forging',  name: 'Ковка',           baseCost: 100,  addPower: 3,  icon: 'forging' },
-      { id: 'fletching',name: 'Оперение стрел',  baseCost: 350,  addPower: 8,  icon: 'fletching' },
-      { id: 'ironCasting',name:'Литье железа',   baseCost: 1000, addPower: 20, icon: 'casting' },
-      { id: 'bodkin',   name: 'Стрела Бодкин',   baseCost: 3000, addPower: 50, icon: 'bodkin' },
-      { id: 'blast',    name: 'Доменная печь',  baseCost: 8000, addPower: 120,icon: 'blast' }
-    ];
+        const EVOLUTION_STAGES = [
+            { id: 'militia', minTaps: 0, name: 'Ополченец', age: 'Темные Века', basePower: 1, icon: UNIT_SVGS.militia, nextMilestone: 50, nextName: 'Мечник' },
+            { id: 'swordsman', minTaps: 50, name: 'Мечник', age: 'Темные Века', basePower: 3, icon: UNIT_SVGS.swordsman, nextMilestone: 200, nextName: 'Лучник' },
+            { id: 'archer', minTaps: 200, name: 'Лучник', age: 'Феодальная Эпоха', basePower: 10, icon: UNIT_SVGS.archer, nextMilestone: 500, nextName: 'Самострельщик' },
+            { id: 'crossbowman', minTaps: 500, name: 'Самострельщик', age: 'Замковая Эпоха', basePower: 25, icon: UNIT_SVGS.crossbowman, nextMilestone: 750, nextName: 'Арбалетчик' },
+            { id: 'arbalester', minTaps: 750, name: 'Арбалетчик', age: 'Замковая Эпоха', basePower: 50, icon: UNIT_SVGS.arbalester, nextMilestone: 1000, nextName: 'Рыцарь' },
+            { id: 'knight', minTaps: 1000, name: 'Рыцарь', age: 'Имперская Эпоха', basePower: 120, icon: UNIT_SVGS.knight, nextMilestone: 2000, nextName: 'Кавалер' },
+            { id: 'cavalier', minTaps: 2000, name: 'Кавалер', age: 'Имперская Эпоха', basePower: 300, icon: UNIT_SVGS.cavalier, nextMilestone: 5000, nextName: 'Паладин' },
+            { id: 'paladin', minTaps: 5000, name: 'Паладин', age: 'Легендарная Эпоха', basePower: 1000, icon: UNIT_SVGS.paladin, nextMilestone: 7500, nextName: 'Гбето' },
+            { id: 'gbeto', minTaps: 7500, name: 'Гбето', age: 'Эпоха Династий', basePower: 2500, icon: UNIT_SVGS.gbeto, nextMilestone: 10000, nextName: 'Тевтонский рыцарь' },
+            { id: 'teutonic', minTaps: 10000, name: 'Тевтонский рыцарь', age: 'Эпоха Крестоносцев', basePower: 6000, icon: UNIT_SVGS.teutonic, nextMilestone: 15000, nextName: 'Боярин' },
+            { id: 'boyar', minTaps: 15000, name: 'Боярин', age: 'Эпоха Княжеств', basePower: 12000, icon: UNIT_SVGS.boyar, nextMilestone: 20000, nextName: 'Арамбай' },
+            { id: 'arambai', minTaps: 20000, name: 'Арамбай', age: 'Эпоха Востока', basePower: 25000, icon: UNIT_SVGS.arambai, nextMilestone: 25000, nextName: 'Боевой слон' },
+            { id: 'war_elephant', minTaps: 25000, name: 'Боевой слон', age: 'Эпоха Империй', basePower: 50000, icon: UNIT_SVGS.war_elephant, nextMilestone: 30000, nextName: 'Лучник на слоне' },
+            { id: 'elephant_archer', minTaps: 30000, name: 'Лучник на слоне', age: 'Индийская Эпоха', basePower: 100000, icon: UNIT_SVGS.elephant_archer, nextMilestone: 35000, nextName: 'Воин-ягуар' },
+            { id: 'jaguar', minTaps: 35000, name: 'Воин-ягуар', age: 'Ацтекская Эпоха', basePower: 200000, icon: UNIT_SVGS.jaguar, nextMilestone: 40000, nextName: 'Самурай' },
+            { id: 'samurai', minTaps: 40000, name: 'Самурай', age: 'Эпоха Сёгуната', basePower: 450000, icon: UNIT_SVGS.samurai, nextMilestone: 45000, nextName: 'Британский лучник' },
+            { id: 'longbowman', minTaps: 45000, name: 'Британский лучник', age: 'Британская Эпоха', basePower: 1000000, icon: UNIT_SVGS.longbowman, nextMilestone: 50000, nextName: 'Конкистадор' },
+            { id: 'conquistador', minTaps: 50000, name: 'Конкистадор', age: 'Эпоха Великих Открытий', basePower: 2500000, icon: UNIT_SVGS.conquistador, nextMilestone: null, nextName: 'MAX' }
+        ];
 
-    // SVG иконки
-    const ICONS = {
-      militia: `<svg class="warrior-icon" viewBox="0 0 100 100"><circle cx="50" cy="35" r="18" fill="#e0c097"/><path d="M30 85 C30 55, 70 55, 70 85 Z" fill="#7a6244"/><path d="M68 30 L85 15 L90 20 L73 35 Z" fill="#aaa"/><rect x="45" y="18" width="10" height="3" fill="#e5b35c"/></svg>`,
-      swordsman: `<svg class="warrior-icon" viewBox="0 0 100 100"><path d="M30 85 C30 50, 70 50, 70 85 Z" fill="#4a5568"/><circle cx="50" cy="32" r="16" fill="#cbd5e0"/><path d="M20 30 L80 30 L50 8 Z" fill="#a0aec0"/><rect x="48" y="25" width="4" height="50" fill="#e2e8f0"/><rect x="35" y="50" width="30" height="6" fill="#e5b35c"/></svg>`,
-      archer: `<svg class="warrior-icon" viewBox="0 0 100 100"><circle cx="50" cy="32" r="16" fill="#e0c097"/><path d="M30 85 C30 55, 70 55, 70 85 Z" fill="#2f7532"/><path d="M25 20 Q60 50 25 80" stroke="#8d5b4c" stroke-width="6" fill="none"/><line x1="25" y1="20" x2="25" y2="80" stroke="#eee" stroke-width="2"/></svg>`,
-      crossbow: `<svg class="warrior-icon" viewBox="0 0 100 100"><path d="M30 85 C30 55, 70 55, 70 85 Z" fill="#3b4a3f"/><circle cx="50" cy="32" r="16" fill="#d2b48c"/><rect x="20" y="45" width="60" height="8" fill="#5c4033"/><rect x="46" y="20" width="8" height="50" fill="#708090"/></svg>`,
-      arbalest: `<svg class="warrior-icon" viewBox="0 0 100 100"><path d="M30 85 C30 55, 70 55, 70 85 Z" fill="#2c3e50"/><circle cx="50" cy="32" r="16" fill="#e2e8f0"/><rect x="15" y="42" width="70" height="10" fill="#4a5568"/><rect x="45" y="15" width="10" height="60" fill="#cbd5e0"/></svg>`,
-      knight: `<svg class="warrior-icon" viewBox="0 0 100 100"><path d="M25 85 C25 45, 75 45, 75 85 Z" fill="#718096"/><rect x="35" y="20" width="30" height="30" rx="5" fill="#cbd5e0"/><rect x="40" y="30" width="20" height="4" fill="#1a202c"/><path d="M50 5 L60 20 L40 20 Z" fill="#e53e3e"/></svg>`,
-      cavalier: `<svg class="warrior-icon" viewBox="0 0 100 100"><path d="M20 85 C20 40, 80 40, 80 85 Z" fill="#2b6cb0"/><rect x="32" y="15" width="36" height="35" rx="5" fill="#e2e8f0"/><polygon points="50,2 65,18 35,18" fill="#dd6b20"/><rect x="38" y="28" width="24" height="5" fill="#1a202c"/></svg>`,
-      paladin: `<svg class="warrior-icon" viewBox="0 0 100 100"><path d="M15 85 C15 35, 85 35, 85 85 Z" fill="#d69e2e"/><rect x="30" y="12" width="40" height="38" rx="6" fill="#f7fafc"/><path d="M50 0 L68 18 L32 18 Z" fill="#b83232"/><rect x="36" y="25" width="28" height="6" fill="#742a2a"/><circle cx="50" cy="60" r="8" fill="#d69e2e"/></svg>`,
-      
-      loom: `<svg viewBox="0 0 24 24" fill="none" stroke="#e5b35c" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18M15 3v18"/></svg>`,
-      forging: `<svg viewBox="0 0 24 24" fill="none" stroke="#e5b35c" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>`,
-      fletching: `<svg viewBox="0 0 24 24" fill="none" stroke="#e5b35c" stroke-width="2"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>`,
-      casting: `<svg viewBox="0 0 24 24" fill="none" stroke="#e5b35c" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>`,
-      bodkin: `<svg viewBox="0 0 24 24" fill="none" stroke="#e5b35c" stroke-width="2"><path d="M12 2L19 21L12 17L5 21L12 2Z"/></svg>`,
-      blast: `<svg viewBox="0 0 24 24" fill="none" stroke="#e5b35c" stroke-width="2"><path d="M12 2c0 5-5 8-5 13a7 7 0 0 0 14 0c0-5-5-8-5-13z"/></svg>`
-    };
+        const UPGRADES_DATA = [
+            { id: 'loom', name: 'Ткацкий станок', desc: '+1 к клику', baseCost: 15, costMult: 1.4, value: 1, type: 'power' },
+            { id: 'forging', name: 'Ковка', desc: '+4 к клику', baseCost: 50, costMult: 1.45, value: 4, type: 'power' },
+            { id: 'fletching', name: 'Оперение стрел', desc: '+12 к клику', baseCost: 200, costMult: 1.5, value: 12, type: 'power' },
+            { id: 'iron_casting', name: 'Отливка железа', desc: '+35 к клику', baseCost: 800, costMult: 1.55, value: 35, type: 'power' },
+            { id: 'bodkin_arrow', name: 'Стрела Бодкин', desc: '+100 к клику', baseCost: 2500, costMult: 1.6, value: 100, type: 'power' },
+            { id: 'blast_furnace', name: 'Доменная печь', desc: '+300 к клику', baseCost: 8000, costMult: 1.65, value: 300, type: 'power' },
+            { id: 'double_tap', name: 'Двойной удар', desc: '+1 тап за клик', baseCost: 25000, costMult: 2.0, value: 1, type: 'taps' }
+        ];
 
-    // Состояние игры
-    let state = {
-      taps: 0,
-      gold: 0,
-      upgrades: {
-        loom: 0,
-        forging: 0,
-        fletching: 0,
-        ironCasting: 0,
-        bodkin: 0,
-        blast: 0
-      }
-    };
+        let gameState = {
+            taps: 0,
+            gold: 0,
+            upgrades: {}
+        };
 
-    // Звуки (Web Audio API)
-    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    function playSound(type) {
-      if (audioCtx.state === 'suspended') audioCtx.resume();
-      const osc = audioCtx.createOscillator();
-      const gain = audioCtx.createGain();
-      osc.connect(gain);
-      gain.connect(audioCtx.destination);
+        function getCurrentStage() {
+            let current = EVOLUTION_STAGES[0];
+            for (let i = 0; i < EVOLUTION_STAGES.length; i++) {
+                if (gameState.taps >= EVOLUTION_STAGES[i].minTaps) {
+                    current = EVOLUTION_STAGES[i];
+                }
+            }
+            return current;
+        }
 
-      if (type === 'tap') {
-        osc.frequency.setValueAtTime(300, audioCtx.currentTime);
-        osc.frequency.exponentialRampToValueAtTime(120, audioCtx.currentTime + 0.08);
-        gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
-        gain.gain.linearRampToValueAtTime(0.01, audioCtx.currentTime + 0.08);
-        osc.
+        function getTapsPerClick() {
+            const extraTaps = gameState.upgrades['double_tap'] || 0;
+            return 1 + extraTaps;
+        }
+
+        function getClickPower() {
+            const stage = getCurrentStage();
+            let bonusPower = 0;
+            UPGRADES_DATA.forEach(upg => {
+                if (upg.type === 'power') {
+                    const lvl = gameState.upgrades[upg.id] || 0;
+                    bonusPower += upg.value * lvl;
+                }
+            });
+            return stage.basePower + bonusPower;
+        }
+
+        function handleClick() {
+            const tapsGained = getTapsPerClick();
+            const powerPerTap = getClickPower();
+            const totalGoldGained = powerPerTap * tapsGained;
+
+            gameState.taps += tapsGained;
+            gameState.gold += totalGoldGained;
+
+            spawnFloatText(`+${totalGoldGained.toLocaleString()} 🪙 (${tapsGained} тапа)`);
+            updateUI();
+            saveToStorage();
+        }
+
+        function spawnFloatText(text) {
+            const btn = document.getElementById('mainClickBtn');
+            if (!btn) return;
+
+            const rect = btn.getBoundingClientRect();
+            const el = document.createElement('div');
+            el.className = 'float-text';
+            el.innerText = text;
+
+            const x = rect.left + rect.width / 2 + (Math.random() * 40 - 20);
+            const y = rect.top + rect.height / 2 + (Math.random() * 20 - 10);
+
+            el.style.left = `${x}px`;
+            el.style.top = `${y}px`;
+
+            document.body.appendChild(el);
+            setTimeout(() => el.remove(), 800);
+        }
+
+        function buyUpgrade(id) {
+            const upg = UPGRADES_DATA.find(u => u.id === id);
+            const lvl = gameState.upgrades[id] || 0;
+            if (lvl >= 20) return;
+
+            const cost = Math.floor(upg.baseCost * Math.pow(upg.costMult, lvl));
+            if (gameState.gold >= cost) {
+                gameState.gold -= cost;
+                gameState.upgrades[id] = lvl + 1;
+                updateUI();
+                saveToStorage();
+            }
+        }
+
+        function updateUI() {
+            document.getElementById('tapCount').innerText = gameState.taps.toLocaleString();
+            document.getElementById('goldCount').innerText = Math.floor(gameState.gold).toLocaleString();
+
+            const stage = getCurrentStage();
+            document.getElementById('currentAgeText').innerText = stage.age;
+            document.getElementById('playerLevelBadge').innerText = Math.min(20, Math.floor(gameState.taps / 2500) + 1);
+
+            document.getElementById('unitTitle').innerText = stage.name;
+            document.getElementById('btnUnitLabel').innerText = stage.name.toUpperCase();
+            
+            const tapsPerClick = getTapsPerClick();
+            document.getElementById('clickPowerText').innerText = `+${getClickPower().toLocaleString()} (х${tapsPerClick} тапов за клик)`;
+            document.getElementById('unitIconContainer').innerHTML = stage.icon;
+
+            const nextLabel = document.getElementById('nextUnitLabel');
+            const progressText = document.getElementById('progressText');
+            const progressBar = document.getElementById('progressBar');
+
+            if (stage.nextMilestone) {
+                const prev = stage.minTaps;
+                const prog = gameState.taps - prev;
+                const total = stage.nextMilestone - prev;
+                const pct = Math.min(100, Math.max(0, (prog / total) * 100));
+
+                nextLabel.innerText = `Прогресс до ${stage.nextName}`;
+                progressText.innerText = `${gameState.taps.toLocaleString()} / ${stage.nextMilestone.toLocaleString()} тапов`;
+                progressBar.style.width = `${pct}%`;
+            } else {
+                nextLabel.innerText = 'Максимальная эволюция (Конкистадор)';
+                progressText.innerText = `${gameState.taps.toLocaleString()} тапов`;
+                progressBar.style.width = '100%';
+            }
+
+            renderMedals();
+            renderUpgrades();
+        }
+
+        /* РЕНДЕР МЕДАЛЕЙ */
+        function renderMedals() {
+            const container = document.getElementById('medalsGrid');
+            container.innerHTML = '';
+
+            EVOLUTION_STAGES.forEach(stage => {
+                const isUnlocked = gameState.taps >= stage.minTaps;
+                const slot = document.createElement('div');
+                slot.className = `medal-slot ${isUnlocked ? 'unlocked' : 'locked'}`;
+                
+                const tooltipText = isUnlocked 
+                    ? `Получено: ${stage.name}` 
+                    : `Заблокировано: ${stage.name} (${stage.minTaps.toLocaleString()} тапов)`;
+                slot.setAttribute('data-tooltip', tooltipText);
+
+                if (isUnlocked) {
+                    slot.innerHTML = stage.icon.replace('class="unit-svg"', 'class="medal-svg"');
+                } else {
+                    slot.innerHTML = '🔒';
+                }
+
+                container.appendChild(slot);
+            });
+        }
+
+        function renderUpgrades() {
+            const container = document.getElementById('upgradesList');
+            container.innerHTML = '';
+
+            UPGRADES_DATA.forEach(upg => {
+                const lvl = gameState.upgrades[upg.id] || 0;
+                const isMax = lvl >= 20;
+                const cost = isMax ? 0 : Math.floor(upg.baseCost * Math.pow(upg.costMult, lvl));
+                const canAfford = !isMax && gameState.gold >= cost;
+
+                const card = document.createElement('div');
+                card.className = 'upg-item';
+                card.innerHTML = `
+                    <div>
+                        <div style="font-weight: bold; font-size: 0.85rem; color: #fef08a;">
+                            ${upg.name} <span style="color: #d4af37; font-size: 0.75rem;">[${lvl}/20]</span>
+                        </div>
+                        <div style="font-size: 0.7rem; color: #a1a1aa;">${upg.desc}</div>
+                    </div>
+                    <button class="upg-btn" ${(!canAfford || isMax) ? 'disabled' : ''} onclick="buyUpgrade('${upg.id}')">
+                        ${isMax ? 'MAX' : cost.toLocaleString() + ' 🪙'}
+                    </button>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        const STORAGE_KEY = 'aoe2_clicker_standalone_save';
+
+        function saveToStorage() {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(gameState));
+        }
+
+        function loadFromStorage() {
+            try {
+                const saved = localStorage.getItem(STORAGE_KEY);
+                if (saved) {
+                    const parsed = JSON.parse(saved);
+                    if (parsed && typeof parsed.taps === 'number') gameState = parsed;
+                }
+            } catch(e){}
+        }
+
+        /* СОХРАНЕНИЕ В ФАЙЛ */
+        document.getElementById('exportBtn').addEventListener('click', () => {
+            saveToStorage();
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(gameState, null, 2));
+            const a = document.createElement('a');
+            a.setAttribute("href", dataStr);
+            a.setAttribute("download", `aoe2_save.json`);
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+        });
+
+        document.getElementById('importBtn').addEventListener('click', () => {
+            document.getElementById('fileInput').click();
+        });
+
+        document.getElementById('fileInput').addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(evt) {
+                try {
+                    const loaded = JSON.parse(evt.target.result);
+                    if (loaded && typeof loaded.taps === 'number') {
+                        gameState = loaded;
+                        saveToStorage();
+                        updateUI();
+                        alert('Сохранение успешно загружено из файла!');
+                    } else {
+                        alert('Ошибка: Файл не содержит данных сохранения!');
+                    }
+                } catch (err) {
+                    alert('Ошибка при чтении файла!');
+                }
+            };
+            reader.readAsText(file);
+        });
+
+        document.getElementById('resetBtn').addEventListener('click', () => {
+            if (confirm('Сбросить весь прогресс?')) {
+                gameState = { taps: 0, gold: 0, upgrades: {} };
+                saveToStorage();
+                updateUI();
+            }
+        });
+
+        document.getElementById('mainClickBtn').addEventListener('click', handleClick);
+
+        loadFromStorage();
+        updateUI();
+    </script>
+</body>
+</html>
