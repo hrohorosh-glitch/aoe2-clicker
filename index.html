@@ -3,810 +3,1453 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Age of Empires II: DE Clicker</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800;900&family=Marcellus&display=swap" rel="stylesheet">
-
+    <title>Пламя и Завоевание — Стратегия</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
     <style>
-        * {
-            box-sizing: border-box;
-            user-select: none;
-            -webkit-user-select: none;
-            margin: 0;
-            padding: 0;
-        }
+        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800;900&family=Inter:wght@400;600;700&display=swap');
 
         body {
-            font-family: 'Marcellus', serif;
+            font-family: 'Inter', sans-serif;
+            background-color: #050202;
+            color: #f3f4f6;
             overflow-x: hidden;
-            background-color: #0b0907;
-            background-image: radial-gradient(circle at center, #261b12 0%, #0b0907 70%);
-            color: #fef3c7;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
+            user-select: none;
         }
 
         .font-cinzel {
             font-family: 'Cinzel', serif;
         }
 
-        /* Панели в стиле Средневековья */
-        .aoe-panel {
-            background: linear-gradient(180deg, #2a1f18 0%, #17100b 100%);
-            border: 3px solid #8e6d3b;
-            box-shadow: inset 0 0 10px #000, 0 8px 20px rgba(0,0,0,0.8);
-            border-radius: 8px;
-            position: relative;
-        }
-
-        .aoe-panel::before {
-            content: '';
-            position: absolute;
-            top: 2px; left: 2px; right: 2px; bottom: 2px;
-            border: 1px solid #d4af37;
+        #bg-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 0;
             pointer-events: none;
-            border-radius: 5px;
-            opacity: 0.5;
         }
 
-        /* Шапка HUD */
-        .aoe-header {
-            background: linear-gradient(180deg, #423223 0%, #1f160e 100%);
-            border-bottom: 3px solid #c8a050;
-            padding: 12px 20px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.8);
+        .panel-glass {
+            background: rgba(18, 10, 8, 0.85);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(249, 115, 22, 0.25);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.7);
         }
 
-        .header-content {
-            max-width: 1200px;
-            margin: 0 auto;
-            display: flex;
-            flex-wrap: wrap;
-            align-items: center;
-            justify-content: space-between;
-            gap: 15px;
+        .card-active {
+            border-color: #f97316 !important;
+            box-shadow: 0 0 15px rgba(249, 115, 22, 0.4);
+            background: rgba(249, 115, 22, 0.1) !important;
         }
 
-        .player-info {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .level-badge {
-            width: 48px;
-            height: 48px;
-            border-radius: 50%;
-            border: 2px solid #f5c842;
-            background: #5c1d0e;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #fcd34d;
-            font-size: 1.25rem;
-            font-weight: 900;
-            box-shadow: inset 0 2px 4px rgba(0,0,0,0.8);
-        }
-
-        .game-title {
-            font-size: 1.15rem;
-            font-weight: 800;
-            color: #fcd34d;
-            letter-spacing: 1px;
-        }
-
-        .resources-box {
-            display: flex;
-            align-items: center;
-            gap: 25px;
-            background: rgba(0, 0, 0, 0.55);
-            padding: 8px 20px;
-            border-radius: 8px;
-            border: 1px solid rgba(142, 109, 59, 0.6);
-        }
-
-        .res-item {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .res-label {
-            font-size: 0.65rem;
-            color: #d4af37;
-            text-transform: uppercase;
-            font-weight: bold;
-        }
-
-        .res-val {
-            font-size: 1.1rem;
-            font-weight: 800;
-            color: #fef08a;
-        }
-
-        /* Главная зона */
-        .main-layout {
-            max-width: 1200px;
-            width: 100%;
-            margin: 0 auto;
-            padding: 20px;
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 20px;
-            flex: 1;
-            align-items: center;
-        }
-
-        @media (min-width: 900px) {
-            .main-layout {
-                grid-template-columns: 7fr 5fr;
-            }
-        }
-
-        /* Кликер */
-        .clicker-section {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-        }
-
-        .unit-card {
-            padding: 10px 25px;
-            margin-bottom: 10px;
-            width: 100%;
-            max-width: 340px;
-        }
-
-        /* БЛОК МЕДАЛЕЙ */
-        .medals-container {
-            width: 100%;
-            max-width: 480px;
-            padding: 8px 12px;
-            margin-bottom: 10px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        .medals-title {
-            font-size: 0.7rem;
-            color: #d4af37;
-            font-weight: bold;
-            margin-bottom: 6px;
-            letter-spacing: 1px;
-        }
-
-        .medals-grid {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 6px;
-        }
-
-        .medal-slot {
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            border: 2px solid #5a4225;
-            background: #120a06;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-            box-shadow: inset 0 2px 5px rgba(0,0,0,0.8);
+        .btn-fire {
+            background: linear-gradient(135deg, #ea580c 0%, #991b1b 100%);
+            border: 1px solid #f97316;
             transition: all 0.2s ease;
         }
 
-        .medal-slot.unlocked {
-            border-color: #f5c842;
-            background: radial-gradient(circle, #854d0e 0%, #2a1f18 100%);
-            box-shadow: 0 0 10px rgba(245, 200, 66, 0.5), inset 0 0 5px rgba(255, 255, 255, 0.4);
+        .btn-fire:hover:not(:disabled) {
+            background: linear-gradient(135deg, #f97316 0%, #dc2626 100%);
+            box-shadow: 0 0 15px rgba(249, 115, 22, 0.6);
+            transform: translateY(-1px);
         }
 
-        .medal-slot .medal-svg {
-            width: 20px;
-            height: 20px;
-            filter: drop-shadow(0 1px 2px rgba(0,0,0,0.8));
-        }
-
-        .medal-slot.locked {
+        .btn-fire:disabled {
             opacity: 0.4;
-            color: #666;
-            font-size: 0.75rem;
-        }
-
-        /* Подсказка при наведении на медаль */
-        .medal-slot:hover::after {
-            content: attr(data-tooltip);
-            position: absolute;
-            bottom: 110%;
-            left: 50%;
-            transform: translateX(-50%);
-            background: #17100b;
-            border: 1px solid #d4af37;
-            color: #fef08a;
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 0.65rem;
-            white-space: nowrap;
-            z-index: 200;
-            pointer-events: none;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.8);
-        }
-
-        /* КРАСНАЯ КНОПКА */
-        .red-click-btn {
-            width: 220px;
-            height: 220px;
-            border-radius: 50%;
-            background: radial-gradient(circle, #e62323 0%, #a80f0f 60%, #570000 100%);
-            border: 6px solid #f5c842;
-            box-shadow: 0 0 35px rgba(230, 35, 35, 0.6), inset 0 4px 10px rgba(255, 255, 255, 0.4), inset 0 -6px 15px rgba(0, 0, 0, 0.7);
-            cursor: pointer;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-            outline: none;
-            transition: transform 0.08s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            margin: 5px 0;
-        }
-
-        .red-click-btn:active {
-            transform: scale(0.95);
-            box-shadow: 0 0 15px rgba(200, 0, 0, 0.9), inset 0 6px 15px rgba(0, 0, 0, 0.9);
-        }
-
-        .unit-svg {
-            width: 95px;
-            height: 95px;
-            pointer-events: none;
-        }
-
-        /* Вылетающий текст */
-        .float-text {
-            position: absolute;
-            pointer-events: none;
-            animation: floatUp 0.85s ease-out forwards;
-            font-family: 'Cinzel', serif;
-            font-weight: 900;
-            font-size: 1.3rem;
-            color: #f5c842;
-            text-shadow: 2px 2px 0 #000, -2px -2px 0 #000, 0 0 8px rgba(245, 200, 66, 0.8);
-            z-index: 100;
-        }
-
-        @keyframes floatUp {
-            0% { opacity: 1; transform: translateY(0) scale(1); }
-            50% { transform: translateY(-40px) scale(1.1); }
-            100% { opacity: 0; transform: translateY(-80px) scale(1); }
-        }
-
-        /* Прогресс-бар */
-        .progress-box {
-            width: 100%;
-            max-width: 400px;
-            padding: 12px;
-            margin-top: 10px;
-        }
-
-        .bar-bg {
-            width: 100%;
-            height: 14px;
-            background: rgba(0,0,0,0.7);
-            border-radius: 10px;
-            border: 1px solid #8e6d3b;
-            overflow: hidden;
-            margin-top: 6px;
-        }
-
-        .bar-fill {
-            height: 100%;
-            width: 0%;
-            background: linear-gradient(90deg, #d97706 0%, #f5c842 100%);
-            transition: width 0.15s ease;
-        }
-
-        /* Правая кузница */
-        .forge-section {
-            display: flex;
-            flex-direction: column;
-            height: 100%;
-        }
-
-        .forge-card {
-            padding: 16px;
-            display: flex;
-            flex-direction: column;
-            max-height: 520px;
-            height: 100%;
-        }
-
-        .forge-title {
-            font-size: 1.1rem;
-            font-weight: bold;
-            color: #fcd34d;
-            border-bottom: 1px solid #5a4225;
-            padding-bottom: 8px;
-            margin-bottom: 12px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .upgrades-list {
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            padding-right: 4px;
-            flex: 1;
-        }
-
-        .upg-item {
-            background: rgba(20, 10, 5, 0.6);
-            border: 1px solid #5a4225;
-            border-radius: 6px;
-            padding: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 10px;
-        }
-
-        .upg-btn {
-            background: linear-gradient(180deg, #d97706 0%, #92400e 100%);
-            border: 1px solid #f5c842;
-            color: #000;
-            font-weight: 900;
-            font-family: 'Cinzel', serif;
-            font-size: 0.75rem;
-            padding: 6px 12px;
-            border-radius: 4px;
-            cursor: pointer;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.5);
-        }
-
-        .upg-btn:disabled {
-            background: #27272a;
-            border-color: #3f3f46;
-            color: #71717a;
             cursor: not-allowed;
-            box-shadow: none;
+            border-color: #4b5563;
         }
 
-        /* Подвал сохранений */
-        .footer-panel {
-            max-width: 1200px;
-            width: 100%;
-            margin: 10px auto 20px auto;
-            padding: 10px 16px;
-            display: flex;
-            flex-wrap: wrap;
-            align-items: center;
-            justify-content: space-between;
-            gap: 10px;
-            font-size: 0.8rem;
+        .locked-resource {
+            opacity: 0.35;
+            filter: grayscale(80%);
+            position: relative;
         }
 
-        .file-btn {
-            background: #2a1f18;
-            border: 1px solid #8e6d3b;
-            color: #fef08a;
-            padding: 6px 12px;
-            border-radius: 4px;
-            font-weight: bold;
-            cursor: pointer;
-            font-family: 'Marcellus', serif;
+        @keyframes pulse-danger {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(1.02); }
         }
 
-        .file-btn:hover {
-            background: #3d2f23;
+        .danger-alert {
+            animation: pulse-danger 0.8s infinite;
         }
 
-        .reset-btn {
-            background: #3b0707;
-            border: 1px solid #851313;
-            color: #fca5a5;
-            padding: 6px 12px;
-            border-radius: 4px;
-            font-weight: bold;
-            cursor: pointer;
+        .danger-period-active {
+            border-color: #ef4444 !important;
+            box-shadow: 0 0 25px rgba(239, 68, 68, 0.6) !important;
+            background: rgba(127, 29, 29, 0.3) !important;
         }
-
-        .reset-btn:hover {
-            background: #500a0a;
-        }
-
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: #140d08; }
-        ::-webkit-scrollbar-thumb { background: #6e5027; border-radius: 3px; }
     </style>
 </head>
-<body>
+<body class="min-h-screen flex flex-col justify-between relative overflow-y-auto">
 
-    <!-- ШАПКА -->
-    <header class="aoe-header">
-        <div class="header-content">
-            <div class="player-info">
-                <div class="level-badge font-cinzel" id="playerLevelBadge">1</div>
-                <div>
-                    <div class="game-title font-cinzel">AGE OF EMPIRES II</div>
-                    <div style="font-size: 0.75rem; color: #d4af37;" id="currentAgeText">ТЕМНЫЕ ВЕКА</div>
-                </div>
-            </div>
+    <!-- Canvas фона -->
+    <canvas id="bg-canvas"></canvas>
 
-            <div class="resources-box">
-                <div class="res-item">
-                    <span style="font-size: 1.2rem;">👆</span>
-                    <div>
-                        <div class="res-label">ТАПОВ</div>
-                        <div class="res-val font-cinzel" id="tapCount">0</div>
-                    </div>
-                </div>
-                <div class="res-item">
-                    <span style="font-size: 1.2rem;">🪙</span>
-                    <div>
-                        <div class="res-label">ЗОЛОТО</div>
-                        <div class="res-val font-cinzel" id="goldCount">0</div>
-                    </div>
-                </div>
-            </div>
+    <!-- ОВЕРЛЕЙ ПАУЗЫ -->
+    <div id="pause-overlay" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex flex-col items-center justify-center hidden">
+        <div class="panel-glass p-8 rounded-2xl text-center max-w-sm border border-amber-500/50 shadow-2xl">
+            <i class="fa-solid fa-pause text-5xl text-amber-500 mb-4 animate-bounce"></i>
+            <h2 class="font-cinzel text-3xl font-bold text-amber-400 mb-2">ИГРА НА ПАУЗЕ</h2>
+            <p class="text-xs text-gray-300 mb-4">Нажмите <span class="bg-amber-900/60 px-2 py-1 rounded text-amber-300 font-bold border border-amber-700">F3</span>, чтобы продолжить.</p>
+            <button onclick="togglePause()" class="btn-fire text-white px-6 py-2 rounded-xl text-sm font-bold">Снять с паузы</button>
         </div>
-    </header>
+    </div>
 
-    <!-- ИГРОВАЯ ЗОНА -->
-    <main class="main-layout">
+    <!-- ИГРОВОЙ ИНТЕРФЕЙС -->
+    <div id="game-screen" class="relative z-10 min-h-screen flex flex-col p-4 md:p-6 max-w-7xl mx-auto w-full">
         
-        <!-- КЛИКЕР (СЛЕВА) -->
-        <section class="clicker-section">
-            <div class="aoe-panel unit-card">
-                <div style="font-size: 0.7rem; color: #d4af37; font-weight: bold;">ТЕКУЩИЙ ВОИН</div>
-                <div class="font-cinzel" id="unitTitle" style="font-size: 1.5rem; font-weight: 900; color: #f5c842;">Ополченец</div>
-                <div style="font-size: 0.8rem; color: #e2e8f0; margin-top: 2px;">Сила клика: <span id="clickPowerText" style="color: #fcd34d; font-weight: bold;">+1</span></div>
-            </div>
-
-            <!-- ПАНЕЛЬ МЕДАЛЕЙ ВЫШЕ КНОПКИ -->
-            <div class="aoe-panel medals-container">
-                <div class="medals-title">🏅 БОЕВЫЕ НАГРАДЫ (ОТКРЫТЫЕ ВОИНЫ)</div>
-                <div class="medals-grid" id="medalsGrid"></div>
-            </div>
-
-            <!-- КНОПКА АТАКИ -->
-            <button class="red-click-btn" id="mainClickBtn">
-                <div id="unitIconContainer"></div>
-                <div class="font-cinzel" id="btnUnitLabel" style="font-weight: 900; color: #fff; font-size: 1.1rem; margin-top: 4px; pointer-events: none;">ОПОЛЧЕНЕЦ</div>
-                <div style="font-size: 0.65rem; color: #fef08a; pointer-events: none;">КЛИКНИ ДЛЯ АТАКИ</div>
-            </button>
-
-            <div class="aoe-panel progress-box">
-                <div style="display: flex; justify-content: space-between; font-size: 0.75rem; font-weight: bold; color: #fcd34d;">
-                    <span id="nextUnitLabel">Прогресс до Мечника</span>
-                    <span id="progressText">0 / 50 тапов</span>
+        <!-- ВЕРХНЯЯ ПАНЕЛЬ: РЕСУРСЫ, НАСЕЛЕНИЕ И ТАЙМЕР РЕЙДЕРОВ -->
+        <header id="main-header" class="panel-glass rounded-2xl p-4 mb-6 flex flex-wrap justify-between items-center gap-4 transition-all duration-300">
+            <!-- Ресурсы и Население -->
+            <div class="grid grid-cols-2 sm:grid-cols-6 gap-3 w-full lg:w-auto">
+                <!-- Население -->
+                <div class="bg-amber-950/40 px-3 py-2 rounded-xl border border-amber-500/50 flex items-center gap-2">
+                    <i class="fa-solid fa-users text-amber-400 text-lg"></i>
+                    <div>
+                        <div class="text-[10px] text-amber-300">Население</div>
+                        <div id="res-pop" class="font-bold text-white text-sm">5/10</div>
+                    </div>
                 </div>
-                <div class="bar-bg">
-                    <div class="bar-fill" id="progressBar"></div>
+
+                <!-- Доступные ресурсы -->
+                <div class="bg-black/40 px-3 py-2 rounded-xl border border-amber-900/40 flex items-center gap-2">
+                    <i class="fa-solid fa-apple-whole text-red-500 text-lg"></i>
+                    <div>
+                        <div class="text-[10px] text-gray-400">Пища</div>
+                        <div id="res-food" class="font-bold text-amber-400 text-sm">100.0</div>
+                    </div>
+                </div>
+
+                <div class="bg-black/40 px-3 py-2 rounded-xl border border-amber-900/40 flex items-center gap-2">
+                    <i class="fa-solid fa-tree text-emerald-500 text-lg"></i>
+                    <div>
+                        <div class="text-[10px] text-gray-400">Дерево</div>
+                        <div id="res-wood" class="font-bold text-amber-400 text-sm">100.0</div>
+                    </div>
+                </div>
+
+                <!-- Камень (разблокируется во II Эпохе) -->
+                <div id="box-res-stone" class="bg-black/20 px-3 py-2 rounded-xl border border-gray-800 flex items-center gap-2 locked-resource" title="Недоступно в I Эпохе">
+                    <i id="icon-res-stone" class="fa-solid fa-lock text-xs text-gray-500"></i>
+                    <div>
+                        <div class="text-[10px] text-gray-500">Камень</div>
+                        <div id="res-stone" class="text-xs text-gray-600 font-bold">Закрыто</div>
+                    </div>
+                </div>
+
+                <!-- Заблокированные ресурсы -->
+                <div class="bg-black/20 px-3 py-2 rounded-xl border border-gray-800 flex items-center gap-2 locked-resource" title="Недоступно в I-II Эпохе">
+                    <i class="fa-solid fa-lock text-xs text-gray-500"></i>
+                    <div>
+                        <div class="text-[10px] text-gray-500">Железо</div>
+                        <div class="text-xs text-gray-600 font-bold">Закрыто</div>
+                    </div>
+                </div>
+
+                <div id="box-res-gold" class="bg-black/20 px-3 py-2 rounded-xl border border-gray-800 flex items-center gap-2 locked-resource" title="Недоступно в I Эпохе">
+                    <i id="icon-res-gold" class="fa-solid fa-lock text-xs text-gray-500"></i>
+                    <div>
+                        <div class="text-[10px] text-gray-500">Золото</div>
+                        <div id="res-gold" class="text-xs text-gray-600 font-bold">Закрыто</div>
+                    </div>
                 </div>
             </div>
-        </section>
 
-        <!-- КУЗНИЦА (СПРАВА) -->
-        <section class="forge-section">
-            <div class="aoe-panel forge-card">
-                <div class="forge-title font-cinzel">⚒️ КУЗНИЦА (МАКС. 20)</div>
-                <div class="upgrades-list" id="upgradesList"></div>
+            <!-- Пауза и Статус рейдеров -->
+            <div class="flex items-center gap-3 w-full sm:w-auto justify-between">
+                <button onclick="togglePause()" class="bg-black/60 hover:bg-amber-950/40 border border-amber-900/50 px-3 py-2 rounded-xl text-xs text-amber-400 font-bold flex items-center gap-2 transition-all">
+                    <i class="fa-solid fa-pause"></i> [F3] Пауза
+                </button>
+
+                <div id="raid-box" class="bg-black/60 px-4 py-2 rounded-xl border border-red-900/50 flex items-center gap-3">
+                    <div class="flex items-center gap-2">
+                        <i id="raid-icon" class="fa-solid fa-skull text-red-500 text-xl"></i>
+                        <div>
+                            <div id="raid-label" class="text-xs text-gray-400">Рейдеры через:</div>
+                            <div id="raid-timer" class="font-bold text-red-400 text-lg">60 с</div>
+                        </div>
+                    </div>
+                    <div id="raid-alert" class="hidden text-xs text-red-400 font-bold danger-alert border border-red-500 px-2 py-1 rounded bg-red-950/50">
+                        ⚠️ Спрячьте рабочих!
+                    </div>
+                </div>
             </div>
-        </section>
+        </header>
 
-    </main>
+        <!-- ОСНОВНАЯ ЧАСТЬ ИГРЫ -->
+        <main class="grid grid-cols-1 lg:grid-cols-12 gap-6 flex-1">
+            
+            <!-- ЛЕВАЯ ПАНЕЛЬ: ИНВЕНТАРЬ И КАРТОЧКИ -->
+            <section class="lg:col-span-5 panel-glass rounded-2xl p-5 flex flex-col gap-4">
+                <div class="flex justify-between items-center border-b border-amber-900/30 pb-3">
+                    <h2 class="font-cinzel text-xl font-bold text-amber-400">Инвентарь карт</h2>
+                    <span id="faction-badge" class="text-xs bg-amber-950 text-amber-300 px-2 py-1 rounded border border-amber-800">Франки</span>
+                </div>
 
-    <!-- ПОДВАЛ СОХРАНЕНИЙ -->
-    <footer class="aoe-panel footer-panel">
-        <div style="font-weight: bold; color: #fcd34d;">💾 Управление сохранением:</div>
-        <div style="display: flex; gap: 8px;">
-            <button class="file-btn" id="exportBtn">📥 Скачать файл</button>
-            <button class="file-btn" id="importBtn">📤 Загрузить файл</button>
-            <button class="reset-btn" id="resetBtn">🗑️ Сброс</button>
-            <input type="file" id="fileInput" style="display: none;" accept=".json">
-        </div>
-    </footer>
+                <!-- ВКЛАДКИ РАЗДЕЛОВ -->
+                <div class="flex flex-wrap gap-2">
+                    <button id="tab-workforce" onclick="switchTab('workforce')" class="flex-1 py-2 px-2 rounded-xl font-semibold text-xs transition-all bg-amber-600 text-white shadow-lg">
+                        <i class="fa-solid fa-users mr-1"></i> Рабочие
+                    </button>
+                    <button id="tab-buildings" onclick="switchTab('buildings')" class="flex-1 py-2 px-2 rounded-xl font-semibold text-xs transition-all bg-black/40 text-gray-400 hover:text-white border border-amber-900/30">
+                        <i class="fa-solid fa-city mr-1"></i> Здания
+                    </button>
+                    <button id="tab-market" onclick="switchTab('market')" class="flex-1 py-2 px-2 rounded-xl font-semibold text-xs transition-all bg-black/40 text-gray-400 hover:text-white border border-amber-900/30">
+                        <i class="fa-solid fa-store mr-1"></i> Рынок
+                    </button>
+                    <button id="tab-forge" onclick="switchTab('forge')" class="flex-1 py-2 px-2 rounded-xl font-semibold text-xs transition-all bg-black/40 text-gray-500 border border-gray-800 cursor-not-allowed opacity-50" disabled>
+                        <i class="fa-solid fa-hammer mr-1"></i> Кузница
+                    </button>
+                    <button id="tab-barracks" onclick="switchTab('barracks')" class="flex-1 py-2 px-2 rounded-xl font-semibold text-xs transition-all bg-black/40 text-gray-500 border border-gray-800 cursor-not-allowed opacity-50" disabled>
+                        <i class="fa-solid fa-shield-halved mr-1"></i> Казарма
+                    </button>
+                    <button id="tab-archery" onclick="switchTab('archery')" class="flex-1 py-2 px-2 rounded-xl font-semibold text-xs transition-all bg-black/40 text-gray-500 border border-gray-800 cursor-not-allowed opacity-50" disabled>
+                        <i class="fa-solid fa-crosshairs mr-1"></i> Стрельбище
+                    </button>
+                    <button id="tab-stables" onclick="switchTab('stables')" class="flex-1 py-2 px-2 rounded-xl font-semibold text-xs transition-all bg-black/40 text-gray-500 border border-gray-800 cursor-not-allowed opacity-50" disabled>
+                        <i class="fa-solid fa-horse mr-1"></i> Конюшня
+                    </button>
+                    <button id="tab-monastery" onclick="switchTab('monastery')" class="flex-1 py-2 px-2 rounded-xl font-semibold text-xs transition-all bg-black/40 text-gray-500 border border-gray-800 cursor-not-allowed opacity-50" disabled>
+                        <i class="fa-solid fa-church mr-1"></i> Монастырь
+                    </button>
+                </div>
 
+                <!-- СОДЕРЖИМОЕ ВКЛАДКИ: РАБОЧАЯ СИЛА -->
+                <div id="section-workforce" class="flex flex-col gap-4">
+                    <!-- Переход во II Эпоху -->
+                    <div id="era-advance-card" class="panel-glass rounded-xl p-4 border border-amber-500/50 bg-amber-950/20 flex items-center justify-between gap-3">
+                        <div>
+                            <div class="font-bold text-sm text-amber-300">Переход во II Эпоху</div>
+                            <div class="text-xs text-gray-400">Цена: <span class="text-emerald-400 font-bold">1000</span> Дерева, <span class="text-red-400 font-bold">1000</span> Пищи</div>
+                            <div class="text-[10px] text-amber-400 mt-0.5">Разблокирует Камень, Золото, Казарму, Стрельбище, Конюшню, Монастырь, Кузницу и Замок</div>
+                        </div>
+                        <button id="btn-advance-era" onclick="advanceToEra2()" class="btn-fire text-white px-3 py-2 rounded-xl font-bold text-xs shadow-md">
+                            Развить Эпоху
+                        </button>
+                    </div>
+
+                    <!-- Карточка рабочей силы -->
+                    <div id="workforce-card" onclick="toggleWorkforce()" class="panel-glass rounded-xl p-4 border border-amber-900/40 cursor-pointer transition-all hover:border-amber-500/50 relative overflow-hidden group">
+                        <div class="flex justify-between items-start mb-2">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-lg bg-amber-950 border border-amber-700 flex items-center justify-center text-amber-400">
+                                    <i class="fa-solid fa-person-digging text-lg"></i>
+                                </div>
+                                <div>
+                                    <h3 class="font-bold text-white group-hover:text-amber-400 transition-colors">Рабочая сила</h3>
+                                    <p class="text-xs text-gray-400">Кликните, чтобы нанять / отозвать</p>
+                                </div>
+                            </div>
+                            <span id="workforce-count" class="bg-amber-500/20 text-amber-300 font-bold px-3 py-1 rounded-lg text-sm border border-amber-500/30">
+                                5 чел.
+                            </span>
+                        </div>
+
+                        <div class="text-xs text-gray-300 bg-black/40 p-2.5 rounded-lg border border-amber-900/20 mb-3">
+                            Приносит <span class="text-amber-400 font-bold">+0.5</span> ресурсов в секунду за 1 рабочего (пока работает).
+                        </div>
+
+                        <div id="card-status-btn" class="w-full py-2 rounded-lg text-center font-bold text-sm bg-gray-800 text-gray-300 border border-gray-700 transition-all">
+                            <i class="fa-solid fa-pause text-xs mr-1"></i> Не работают (В безопасности)
+                        </div>
+                    </div>
+
+                    <!-- Карточка Найма Рабочего -->
+                    <div class="panel-glass rounded-xl p-4 border border-amber-900/40 flex items-center justify-between gap-3">
+                        <div>
+                            <div class="font-bold text-sm text-white">Найм Рабочего</div>
+                            <div class="text-xs text-gray-400">Цена: <span id="worker-cost-text" class="text-red-400 font-bold">50.0</span> Пищи</div>
+                            <div class="text-[10px] text-gray-500 mt-0.5">+2.0 к стоимости за каждый найм (Макс. лимит 200)</div>
+                        </div>
+                        <button id="buy-worker-btn" onclick="buyWorker()" class="btn-fire text-white px-4 py-2 rounded-xl font-bold text-sm shadow-md">
+                            +1 Рабочий
+                        </button>
+                    </div>
+                </div>
+
+                <!-- СОДЕРЖИМОЕ ВКЛАДКИ: ЗДАНИЯ -->
+                <div id="section-buildings" class="flex flex-col gap-4 hidden">
+                    <!-- Рынок (Бесплатно с I Эпохи) -->
+                    <div class="panel-glass rounded-xl p-4 border border-amber-900/40 flex flex-col gap-3">
+                        <div class="flex justify-between items-start">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-lg bg-amber-950 border border-amber-700 flex items-center justify-center text-amber-400">
+                                    <i class="fa-solid fa-store text-lg"></i>
+                                </div>
+                                <div>
+                                    <h3 class="font-bold text-white">Рынок</h3>
+                                    <p class="text-xs text-amber-400">Позволяет обменивать ресурсы</p>
+                                </div>
+                            </div>
+                            <span class="bg-amber-950 text-amber-300 font-bold px-2.5 py-1 rounded-lg text-xs border border-amber-800">1 шт.</span>
+                        </div>
+                        <div class="flex justify-between items-center border-t border-amber-900/20 pt-2">
+                            <div class="text-xs text-emerald-400 font-bold">Построено бесплатно</div>
+                            <button disabled class="bg-gray-800 text-gray-500 px-4 py-1.5 rounded-xl font-bold text-xs border border-gray-700 cursor-not-allowed">Построено</button>
+                        </div>
+                    </div>
+
+                    <!-- Частокол (I Эпоха) -->
+                    <div class="panel-glass rounded-xl p-4 border border-amber-900/40 flex flex-col gap-3">
+                        <div class="flex justify-between items-start">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-lg bg-amber-950 border border-amber-700 flex items-center justify-center text-amber-400">
+                                    <i class="fa-solid fa-shield text-lg"></i>
+                                </div>
+                                <div>
+                                    <h3 class="font-bold text-white">Частокол</h3>
+                                    <p class="text-xs text-amber-400">Снижает потери крестьян до 25%</p>
+                                </div>
+                            </div>
+                            <span id="palisade-count" class="bg-amber-950 text-amber-300 font-bold px-2.5 py-1 rounded-lg text-xs border border-amber-800">0 шт.</span>
+                        </div>
+                        <div class="text-xs text-gray-300 bg-black/40 p-2.5 rounded-lg border border-amber-900/20">
+                            Деревянные укрепления принимают удар рейдеров на себя, защищая ваших крестьян.
+                        </div>
+                        <div class="flex justify-between items-center border-t border-amber-900/20 pt-2">
+                            <div class="text-xs text-gray-400">Цена: <span class="text-emerald-400 font-bold">200</span> Дерева</div>
+                            <button id="buy-palisade-btn" onclick="buyPalisade()" class="btn-fire text-white px-4 py-1.5 rounded-xl font-bold text-xs shadow-md">Построить</button>
+                        </div>
+                    </div>
+
+                    <!-- Аванпост (I Эпоха) -->
+                    <div class="panel-glass rounded-xl p-4 border border-amber-900/40 flex flex-col gap-3">
+                        <div class="flex justify-between items-start">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-lg bg-amber-950 border border-amber-700 flex items-center justify-center text-amber-400">
+                                    <i class="fa-solid fa-eye text-lg"></i>
+                                </div>
+                                <div>
+                                    <h3 class="font-bold text-white">Аванпост</h3>
+                                    <p class="text-xs text-amber-400">Предупреждает о подходах армий</p>
+                                </div>
+                            </div>
+                            <span id="outpost-count" class="bg-amber-950 text-amber-300 font-bold px-2.5 py-1 rounded-lg text-xs border border-amber-800">0 / 1 шт.</span>
+                        </div>
+                        <div class="text-xs text-gray-300 bg-black/40 p-2.5 rounded-lg border border-amber-900/20">
+                            Предупреждает игрока о приближении вражеских армий до атаки. Можно построить только один раз.
+                        </div>
+                        <div class="flex justify-between items-center border-t border-amber-900/20 pt-2">
+                            <div class="text-xs text-gray-400">Цена: <span class="text-emerald-400 font-bold">500</span> Дерева</div>
+                            <button id="buy-outpost-btn" onclick="buyOutpost()" class="btn-fire text-white px-4 py-1.5 rounded-xl font-bold text-xs shadow-md">Построить</button>
+                        </div>
+                    </div>
+
+                    <!-- Жилой Дом -->
+                    <div class="panel-glass rounded-xl p-4 border border-amber-900/40 flex flex-col gap-3">
+                        <div class="flex justify-between items-start">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-lg bg-amber-950 border border-amber-700 flex items-center justify-center text-amber-400">
+                                    <i class="fa-solid fa-house text-lg"></i>
+                                </div>
+                                <div>
+                                    <h3 class="font-bold text-white">Жилой Дом</h3>
+                                    <p class="text-xs text-amber-400">+2 к макс. населению (Макс. 200)</p>
+                                </div>
+                            </div>
+                            <span id="house-count" class="bg-amber-950 text-amber-300 font-bold px-2.5 py-1 rounded-lg text-xs border border-amber-800">0 шт.</span>
+                        </div>
+                        <div class="flex justify-between items-center border-t border-amber-900/20 pt-2">
+                            <div class="text-xs text-gray-400">Цена: <span class="text-emerald-400 font-bold">300</span> Дерева</div>
+                            <button id="buy-house-btn" onclick="buyHouse()" class="btn-fire text-white px-4 py-1.5 rounded-xl font-bold text-xs shadow-md">Построить</button>
+                        </div>
+                    </div>
+
+                    <!-- Ферма -->
+                    <div class="panel-glass rounded-xl p-4 border border-amber-900/40 flex flex-col gap-3">
+                        <div class="flex justify-between items-start">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-lg bg-red-950 border border-red-700 flex items-center justify-center text-red-400">
+                                    <i class="fa-solid fa-wheat-awn text-lg"></i>
+                                </div>
+                                <div>
+                                    <h3 class="font-bold text-white">Ферма</h3>
+                                    <p id="farm-bonus-desc" class="text-xs text-red-400">+7 пищи/сек (Бонус Франков)</p>
+                                </div>
+                            </div>
+                            <span id="farm-count" class="bg-red-950 text-red-300 font-bold px-2.5 py-1 rounded-lg text-xs border border-red-800">0 шт.</span>
+                        </div>
+                        <div class="flex justify-between items-center border-t border-amber-900/20 pt-2">
+                            <div class="text-xs text-gray-400">Цена: <span class="text-emerald-400 font-bold">250</span> Дерева</div>
+                            <button id="buy-farm-btn" onclick="buyFarm()" class="btn-fire text-white px-4 py-1.5 rounded-xl font-bold text-xs shadow-md">Построить</button>
+                        </div>
+                    </div>
+
+                    <!-- Лесопилка -->
+                    <div class="panel-glass rounded-xl p-4 border border-amber-900/40 flex flex-col gap-3">
+                        <div class="flex justify-between items-start">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-lg bg-emerald-950 border border-emerald-700 flex items-center justify-center text-emerald-400">
+                                    <i class="fa-solid fa-tree text-lg"></i>
+                                </div>
+                                <div>
+                                    <h3 class="font-bold text-white">Лесопилка</h3>
+                                    <p class="text-xs text-emerald-400">+10 дерева/сек</p>
+                                </div>
+                            </div>
+                            <span id="sawmill-count" class="bg-emerald-950 text-emerald-300 font-bold px-2.5 py-1 rounded-lg text-xs border border-emerald-800">0 шт.</span>
+                        </div>
+                        <div class="flex justify-between items-center border-t border-amber-900/20 pt-2">
+                            <div class="text-xs text-gray-400">Цена: <span class="text-emerald-400 font-bold">500</span> Дерева</div>
+                            <button id="buy-sawmill-btn" onclick="buySawmill()" class="btn-fire text-white px-4 py-1.5 rounded-xl font-bold text-xs shadow-md">Построить</button>
+                        </div>
+                    </div>
+
+                    <!-- Каменоломня -->
+                    <div class="panel-glass rounded-xl p-4 border border-amber-900/40 flex flex-col gap-3">
+                        <div class="flex justify-between items-start">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-lg bg-gray-950 border border-gray-700 flex items-center justify-center text-gray-300">
+                                    <i class="fa-solid fa-cubes text-lg"></i>
+                                </div>
+                                <div>
+                                    <h3 class="font-bold text-white">Каменоломня</h3>
+                                    <p class="text-xs text-gray-300">+8 камня/сек (Дает +3 сразу)</p>
+                                </div>
+                            </div>
+                            <span id="quarry-count" class="bg-gray-950 text-gray-300 font-bold px-2.5 py-1 rounded-lg text-xs border border-gray-800">0 шт.</span>
+                        </div>
+                        <div class="flex justify-between items-center border-t border-amber-900/20 pt-2">
+                            <div class="text-xs text-gray-400">Цена: <span class="text-emerald-400 font-bold">400</span> Дерева</div>
+                            <button id="buy-quarry-btn" onclick="buyQuarry()" class="btn-fire text-white px-4 py-1.5 rounded-xl font-bold text-xs shadow-md">Построить</button>
+                        </div>
+                    </div>
+
+                    <!-- Порт -->
+                    <div class="panel-glass rounded-xl p-4 border border-amber-900/40 flex flex-col gap-3">
+                        <div class="flex justify-between items-start">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-lg bg-blue-950 border border-blue-700 flex items-center justify-center text-blue-400">
+                                    <i class="fa-solid fa-anchor text-lg"></i>
+                                </div>
+                                <div>
+                                    <h3 class="font-bold text-white">Порт</h3>
+                                    <p class="text-xs text-blue-400">+15 пищи/сек</p>
+                                </div>
+                            </div>
+                            <span id="port-count" class="bg-blue-950 text-blue-300 font-bold px-2.5 py-1 rounded-lg text-xs border border-blue-800">0 шт.</span>
+                        </div>
+                        <div class="flex justify-between items-center border-t border-amber-900/20 pt-2">
+                            <div class="text-xs text-gray-400">Цена: <span class="text-emerald-400 font-bold">1000</span> Дерева</div>
+                            <button id="buy-port-btn" onclick="buyPort()" class="btn-fire text-white px-4 py-1.5 rounded-xl font-bold text-xs shadow-md">Построить</button>
+                        </div>
+                    </div>
+
+                    <!-- ЗДАНИЯ II ЭПОХИ -->
+                    <div id="era2-buildings-title" class="text-xs font-bold text-amber-400 border-t border-amber-900/40 pt-2 hidden">
+                        🏰 Военные и Культурные постройки II Эпохи (Лимит: 1 шт.):
+                    </div>
+
+                    <!-- Кузница (II Эпоха, Лимит 1) -->
+                    <div id="card-forge-build" class="panel-glass rounded-xl p-4 border border-amber-900/40 flex flex-col gap-3 hidden">
+                        <div class="flex justify-between items-start">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-lg bg-orange-950 border border-orange-700 flex items-center justify-center text-orange-400">
+                                    <i class="fa-solid fa-hammer text-lg"></i>
+                                </div>
+                                <div>
+                                    <h3 class="font-bold text-white">Кузница</h3>
+                                    <p class="text-xs text-orange-400">Улучшения доспехов и оружия</p>
+                                </div>
+                            </div>
+                            <span id="forge-count" class="bg-orange-950 text-orange-300 font-bold px-2.5 py-1 rounded-lg text-xs border border-orange-800">0 / 1 шт.</span>
+                        </div>
+                        <div class="flex justify-between items-center border-t border-amber-900/20 pt-2">
+                            <div class="text-xs text-gray-400">Цена: <span class="text-emerald-400 font-bold">800</span> Дерева, <span class="text-gray-300 font-bold">500</span> Камня</div>
+                            <button id="buy-forge-btn" onclick="buyForge()" class="btn-fire text-white px-4 py-1.5 rounded-xl font-bold text-xs shadow-md">Построить</button>
+                        </div>
+                    </div>
+
+                    <!-- Казарма (II Эпоха, Лимит 1) -->
+                    <div id="card-barracks-build" class="panel-glass rounded-xl p-4 border border-amber-900/40 flex flex-col gap-3 hidden">
+                        <div class="flex justify-between items-start">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-lg bg-red-950 border border-red-700 flex items-center justify-center text-red-400">
+                                    <i class="fa-solid fa-shield-halved text-lg"></i>
+                                </div>
+                                <div>
+                                    <h3 class="font-bold text-white">Казарма</h3>
+                                    <p class="text-xs text-red-400">Открывает раздел "Казарма"</p>
+                                </div>
+                            </div>
+                            <span id="barracks-count" class="bg-red-950 text-red-300 font-bold px-2.5 py-1 rounded-lg text-xs border border-red-800">0 / 1 шт.</span>
+                        </div>
+                        <div class="flex justify-between items-center border-t border-amber-900/20 pt-2">
+                            <div class="text-xs text-gray-400">Цена: <span class="text-emerald-400 font-bold">900</span> Дерева</div>
+                            <button id="buy-barracks-btn" onclick="buyBarracks()" class="btn-fire text-white px-4 py-1.5 rounded-xl font-bold text-xs shadow-md">Построить</button>
+                        </div>
+                    </div>
+
+                    <!-- Стрельбище (II Эпоха, Лимит 1) -->
+                    <div id="card-archery-build" class="panel-glass rounded-xl p-4 border border-amber-900/40 flex flex-col gap-3 hidden">
+                        <div class="flex justify-between items-start">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-lg bg-emerald-950 border border-emerald-700 flex items-center justify-center text-emerald-400">
+                                    <i class="fa-solid fa-crosshairs text-lg"></i>
+                                </div>
+                                <div>
+                                    <h3 class="font-bold text-white">Стрельбище</h3>
+                                    <p class="text-xs text-emerald-400">Открывает раздел "Стрельбище"</p>
+                                </div>
+                            </div>
+                            <span id="archery-count" class="bg-emerald-950 text-emerald-300 font-bold px-2.5 py-1 rounded-lg text-xs border border-emerald-800">0 / 1 шт.</span>
+                        </div>
+                        <div class="flex justify-between items-center border-t border-amber-900/20 pt-2">
+                            <div class="text-xs text-gray-400">Цена: <span class="text-emerald-400 font-bold">900</span> Дерева</div>
+                            <button id="buy-archery-btn" onclick="buyArchery()" class="btn-fire text-white px-4 py-1.5 rounded-xl font-bold text-xs shadow-md">Построить</button>
+                        </div>
+                    </div>
+
+                    <!-- Конюшня (II Эпоха, Лимит 1) -->
+                    <div id="card-stables-build" class="panel-glass rounded-xl p-4 border border-amber-900/40 flex flex-col gap-3 hidden">
+                        <div class="flex justify-between items-start">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-lg bg-amber-950 border border-amber-700 flex items-center justify-center text-amber-400">
+                                    <i class="fa-solid fa-horse text-lg"></i>
+                                </div>
+                                <div>
+                                    <h3 class="font-bold text-white">Конюшня</h3>
+                                    <p class="text-xs text-amber-400">Открывает раздел "Конюшня"</p>
+                                </div>
+                            </div>
+                            <span id="stables-count" class="bg-amber-950 text-amber-300 font-bold px-2.5 py-1 rounded-lg text-xs border border-amber-800">0 / 1 шт.</span>
+                        </div>
+                        <div class="flex justify-between items-center border-t border-amber-900/20 pt-2">
+                            <div class="text-xs text-gray-400">Цена: <span class="text-emerald-400 font-bold">900</span> Дерева</div>
+                            <button id="buy-stables-btn" onclick="buyStables()" class="btn-fire text-white px-4 py-1.5 rounded-xl font-bold text-xs shadow-md">Построить</button>
+                        </div>
+                    </div>
+
+                    <!-- Монастырь (II Эпоха, Лимит 1) -->
+                    <div id="card-monastery-build" class="panel-glass rounded-xl p-4 border border-amber-900/40 flex flex-col gap-3 hidden">
+                        <div class="flex justify-between items-start">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-lg bg-purple-950 border border-purple-700 flex items-center justify-center text-purple-400">
+                                    <i class="fa-solid fa-church text-lg"></i>
+                                </div>
+                                <div>
+                                    <h3 class="font-bold text-white">Монастырь</h3>
+                                    <p class="text-xs text-purple-400">Открывает раздел "Монастырь"</p>
+                                </div>
+                            </div>
+                            <span id="monastery-count" class="bg-purple-950 text-purple-300 font-bold px-2.5 py-1 rounded-lg text-xs border border-purple-800">0 / 1 шт.</span>
+                        </div>
+                        <div class="flex justify-between items-center border-t border-amber-900/20 pt-2">
+                            <div class="text-xs text-gray-400">Цена: <span class="text-emerald-400 font-bold">1500</span> Дерева</div>
+                            <button id="buy-monastery-btn" onclick="buyMonastery()" class="btn-fire text-white px-4 py-1.5 rounded-xl font-bold text-xs shadow-md">Построить</button>
+                        </div>
+                    </div>
+
+                    <!-- Замок (II Эпоха, Лимит 1) -->
+                    <div id="card-castle-build" class="panel-glass rounded-xl p-4 border border-amber-900/40 flex flex-col gap-3 hidden">
+                        <div class="flex justify-between items-start">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-lg bg-stone-900 border border-amber-700 flex items-center justify-center text-amber-400">
+                                    <i class="fa-solid fa-chess-rook text-lg"></i>
+                                </div>
+                                <div>
+                                    <h3 class="font-bold text-white">Замок</h3>
+                                    <p class="text-xs text-amber-400">Поглощает 50% войск врага</p>
+                                </div>
+                            </div>
+                            <span id="castle-count" class="bg-amber-950 text-amber-300 font-bold px-2.5 py-1 rounded-lg text-xs border border-amber-800">0 / 1 шт.</span>
+                        </div>
+                        <div class="flex justify-between items-center border-t border-amber-900/20 pt-2">
+                            <div class="text-xs text-gray-400">Цена: <span class="text-gray-300 font-bold">1700</span> Камень, <span class="text-emerald-400 font-bold">3000</span> Дерева</div>
+                            <button id="buy-castle-btn" onclick="buyCastle()" class="btn-fire text-white px-4 py-1.5 rounded-xl font-bold text-xs shadow-md">Построить</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- СОДЕРЖИМОЕ ВКЛАДКИ: КУЗНИЦА -->
+                <div id="section-forge" class="flex flex-col gap-4 hidden">
+                    <div class="panel-glass rounded-xl p-4 border border-orange-900/40 flex flex-col gap-3">
+                        <div class="flex items-center gap-3 border-b border-orange-900/30 pb-3">
+                            <div class="w-10 h-10 rounded-lg bg-orange-950 border border-orange-700 flex items-center justify-center text-orange-400">
+                                <i class="fa-solid fa-hammer text-lg"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-white">Улучшения Кузницы (II Эпоха)</h3>
+                                <p class="text-xs text-orange-400">Позволяет ковать прочные доспехи и улучшать оружие ближнего и дальнего боя</p>
+                            </div>
+                        </div>
+
+                        <!-- ИССЛЕДОВАНИЕ 1: FORGING -->
+                        <div class="bg-black/40 p-3 rounded-xl border border-orange-900/20 flex items-center justify-between gap-2">
+                            <div>
+                                <div class="font-bold text-xs text-white flex items-center gap-1">
+                                    <i class="fa-solid fa-hand-fist text-red-400"></i> Ковка
+                                </div>
+                                <div class="text-[10px] text-gray-300 mt-0.5">+1 к атаке пехоты и кавалерии</div>
+                                <div class="text-[10px] text-red-400 font-bold">150 Пищи</div>
+                            </div>
+                            <button id="btn-upg-forging" onclick="buyUpgrade('forging', 150, 0, 0)" class="btn-fire text-white px-3 py-1.5 rounded-lg text-xs font-bold">Изучить</button>
+                        </div>
+
+                        <!-- ИССЛЕДОВАНИЕ 2: SCALE MAIL ARMOR -->
+                        <div class="bg-black/40 p-3 rounded-xl border border-orange-900/20 flex items-center justify-between gap-2">
+                            <div>
+                                <div class="font-bold text-xs text-white flex items-center gap-1">
+                                    <i class="fa-solid fa-vest text-amber-400"></i> Чешуйчатый доспех
+                                </div>
+                                <div class="text-[10px] text-gray-300 mt-0.5">+1 к защите ближнего боя пехоты</div>
+                                <div class="text-[10px] text-red-400 font-bold">100 Пищи</div>
+                            </div>
+                            <button id="btn-upg-scale-mail" onclick="buyUpgrade('scaleMail', 100, 0, 0)" class="btn-fire text-white px-3 py-1.5 rounded-lg text-xs font-bold">Изучить</button>
+                        </div>
+
+                        <!-- ИССЛЕДОВАНИЕ 3: FLETCHING -->
+                        <div class="bg-black/40 p-3 rounded-xl border border-orange-900/20 flex items-center justify-between gap-2">
+                            <div>
+                                <div class="font-bold text-xs text-white flex items-center gap-1">
+                                    <i class="fa-solid fa-feather text-emerald-400"></i> Оперение стрел
+                                </div>
+                                <div class="text-[10px] text-gray-300 mt-0.5">+1 к атаке и дальности стрельбы лучников/замков</div>
+                                <div class="text-[10px] text-red-400 font-bold">100 Пищи, <span class="text-amber-400">50 Золота</span></div>
+                            </div>
+                            <button id="btn-upg-fletching" onclick="buyUpgrade('fletching', 100, 0, 50)" class="btn-fire text-white px-3 py-1.5 rounded-lg text-xs font-bold">Изучить</button>
+                        </div>
+
+                        <!-- ИССЛЕДОВАНИЕ 4: PADDED ARCHER ARMOR -->
+                        <div class="bg-black/40 p-3 rounded-xl border border-orange-900/20 flex items-center justify-between gap-2">
+                            <div>
+                                <div class="font-bold text-xs text-white flex items-center gap-1">
+                                    <i class="fa-solid fa-shirt text-blue-400"></i> Кожаный доспех стрелков
+                                </div>
+                                <div class="text-[10px] text-gray-300 mt-0.5">+1 к защите лучников</div>
+                                <div class="text-[10px] text-red-400 font-bold">100 Пищи</div>
+                            </div>
+                            <button id="btn-upg-padded-archer" onclick="buyUpgrade('paddedArcher', 100, 0, 0)" class="btn-fire text-white px-3 py-1.5 rounded-lg text-xs font-bold">Изучить</button>
+                        </div>
+
+                        <!-- ИССЛЕДОВАНИЕ 5: SCALE BARDING ARMOR -->
+                        <div class="bg-black/40 p-3 rounded-xl border border-orange-900/20 flex items-center justify-between gap-2">
+                            <div>
+                                <div class="font-bold text-xs text-white flex items-center gap-1">
+                                    <i class="fa-solid fa-horse-head text-amber-500"></i> Чешуйчатые доспехи кавалерии
+                                </div>
+                                <div class="text-[10px] text-gray-300 mt-0.5">+1 к защите всадников</div>
+                                <div class="text-[10px] text-red-400 font-bold">150 Пищи</div>
+                            </div>
+                            <button id="btn-upg-scale-barding" onclick="buyUpgrade('scaleBarding', 150, 0, 0)" class="btn-fire text-white px-3 py-1.5 rounded-lg text-xs font-bold">Изучить</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- СОДЕРЖИМОЕ ВКЛАДКИ: РЫНОК -->
+                <div id="section-market" class="flex flex-col gap-4 hidden">
+                    <div class="panel-glass rounded-xl p-5 border border-amber-900/40 flex flex-col gap-4">
+                        <div class="flex items-center gap-3 border-b border-amber-900/30 pb-3">
+                            <div class="w-10 h-10 rounded-lg bg-amber-950 border border-amber-700 flex items-center justify-center text-amber-400">
+                                <i class="fa-solid fa-right-left text-lg"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-white">Торговый Обменник</h3>
+                                <p class="text-xs text-gray-400">Курс: <span class="text-amber-400 font-bold">200 отдаете</span> ➔ <span class="text-emerald-400 font-bold">100 получаете</span></p>
+                            </div>
+                        </div>
+
+                        <!-- Форма обмена -->
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <!-- Отдаем -->
+                            <div class="bg-black/40 p-3 rounded-xl border border-amber-900/20">
+                                <label class="text-xs text-gray-400 block mb-1 font-semibold">Отдаем (200 ед.):</label>
+                                <select id="market-give" onchange="updateMarketUI()" class="w-full bg-amber-950/60 border border-amber-800/60 rounded-lg p-2 text-xs text-amber-200 outline-none">
+                                    <option value="food">Пища</option>
+                                    <option value="wood">Дерево</option>
+                                    <option value="stone" disabled id="opt-give-stone">Камень (Заблокировано)</option>
+                                    <option value="iron" disabled>Железо (Заблокировано)</option>
+                                    <option value="gold" disabled id="opt-give-gold">Золото (Заблокировано)</option>
+                                </select>
+                            </div>
+
+                            <!-- Получаем -->
+                            <div class="bg-black/40 p-3 rounded-xl border border-amber-900/20">
+                                <label class="text-xs text-gray-400 block mb-1 font-semibold">Получаем (100 ед.):</label>
+                                <select id="market-get" onchange="updateMarketUI()" class="w-full bg-amber-950/60 border border-amber-800/60 rounded-lg p-2 text-xs text-amber-200 outline-none">
+                                    <option value="wood">Дерево</option>
+                                    <option value="food">Пища</option>
+                                    <option value="stone" disabled id="opt-get-stone">Камень (Заблокировано)</option>
+                                    <option value="iron" disabled>Железо (Заблокировано)</option>
+                                    <option value="gold" disabled id="opt-get-gold">Золото (Заблокировано)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <button id="btn-execute-trade" onclick="executeTrade()" class="btn-fire text-white py-2.5 rounded-xl font-bold text-xs shadow-md mt-1">
+                            Совершить Сделку (200 ➔ 100)
+                        </button>
+                    </div>
+                </div>
+
+                <!-- СОДЕРЖИМОЕ ВКЛАДКИ: КАЗАРМА -->
+                <div id="section-barracks" class="flex flex-col gap-4 hidden">
+                    <div class="panel-glass rounded-xl p-6 text-center border border-red-900/40">
+                        <i class="fa-solid fa-shield-halved text-4xl text-red-500 mb-2"></i>
+                        <h3 class="font-cinzel text-lg font-bold text-red-400">Раздел «Казарма»</h3>
+                        <p class="text-xs text-gray-400 mt-1">В будущем здесь будет доступен найм пехоты (мечников и копейщиков).</p>
+                    </div>
+                </div>
+
+                <!-- СОДЕРЖИМОЕ ВКЛАДКИ: СТРЕЛЬБИЩЕ -->
+                <div id="section-archery" class="flex flex-col gap-4 hidden">
+                    <div class="panel-glass rounded-xl p-6 text-center border border-emerald-900/40">
+                        <i class="fa-solid fa-crosshairs text-4xl text-emerald-500 mb-2"></i>
+                        <h3 class="font-cinzel text-lg font-bold text-emerald-400">Раздел «Стрельбище»</h3>
+                        <p class="text-xs text-gray-400 mt-1">В будущем здесь будет доступен найм лучников и арбалетчиков.</p>
+                    </div>
+                </div>
+
+                <!-- СОДЕРЖИМОЕ ВКЛАДКИ: КОНЮШНЯ -->
+                <div id="section-stables" class="flex flex-col gap-4 hidden">
+                    <div class="panel-glass rounded-xl p-6 text-center border border-amber-900/40">
+                        <i class="fa-solid fa-horse-head text-4xl text-amber-500 mb-2"></i>
+                        <h3 class="font-cinzel text-lg font-bold text-amber-400">Раздел «Конюшня»</h3>
+                        <p class="text-xs text-gray-400 mt-1">Здесь в будущем будет доступен найм кавалерии и всадников.</p>
+                    </div>
+                </div>
+
+                <!-- СОДЕРЖИМОЕ ВКЛАДКИ: МОНАСТЫРЬ -->
+                <div id="section-monastery" class="flex flex-col gap-4 hidden">
+                    <div class="panel-glass rounded-xl p-6 text-center border border-purple-900/40">
+                        <i class="fa-solid fa-church text-4xl text-purple-500 mb-2"></i>
+                        <h3 class="font-cinzel text-lg font-bold text-purple-400">Раздел «Монастырь»</h3>
+                        <p class="text-xs text-gray-400 mt-1">В будущем здесь будет доступен найм монахов и лекарей.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ЦЕНТРАЛЬНАЯ ПАНЕЛЬ: ПОСЕЛЕНИЕ -->
+            <section class="lg:col-span-7 panel-glass rounded-2xl p-6 flex flex-col justify-between items-center text-center relative overflow-hidden min-h-[350px]">
+                <div class="w-full flex justify-between items-center text-xs text-amber-500/80 font-cinzel">
+                    <span id="era-indicator">Эпоха: Первобытное общество (I)</span>
+                    <span id="settlement-status" class="text-gray-400">Отдых</span>
+                </div>
+
+                <div class="my-auto my-8 flex flex-col items-center">
+                    <div class="w-28 h-28 rounded-full bg-amber-950/40 border-2 border-amber-600/50 flex items-center justify-center shadow-2xl mb-4 relative">
+                        <i id="settlement-icon" class="fa-solid fa-campground text-5xl text-amber-500"></i>
+                    </div>
+                    <h2 id="settlement-name" class="font-cinzel text-2xl font-bold text-amber-400 mb-1">Первобытное Поселение</h2>
+                    <p id="settlement-desc" class="text-xs text-gray-400 max-w-md">
+                        Первые шаги вашей цивилизации. Торгуйте на рынке, стройте частокол, аванпосты и развивайтесь во II Эпоху!
+                    </p>
+                </div>
+
+                <!-- Уведомления об атаках и админ-кодах -->
+                <div id="raid-result-banner" class="w-full py-2 px-4 rounded-xl text-xs font-bold hidden transition-all"></div>
+            </section>
+        </main>
+    </div>
+
+    <!-- СКТИПТЫ И ЛОГИКА ИГРЫ -->
     <script>
-        /* ИКОНКИ ВОИНОВ */
-        const UNIT_SVGS = {
-            militia: `<svg class="unit-svg" viewBox="0 0 100 100"><circle cx="50" cy="35" r="18" fill="#e0c097"/><path d="M30 85 C30 55, 70 55, 70 85 Z" fill="#7a6244"/><path d="M68 30 L85 15 L90 20 L73 35 Z" fill="#aaa"/><rect x="45" y="18" width="10" height="3" fill="#e5b35c"/></svg>`,
-            swordsman: `<svg class="unit-svg" viewBox="0 0 100 100"><path d="M30 85 C30 50, 70 50, 70 85 Z" fill="#4a5568"/><circle cx="50" cy="32" r="16" fill="#cbd5e0"/><path d="M20 30 L80 30 L50 8 Z" fill="#a0aec0"/><rect x="48" y="25" width="4" height="50" fill="#e2e8f0"/><rect x="35" y="50" width="30" height="6" fill="#e5b35c"/></svg>`,
-            archer: `<svg class="unit-svg" viewBox="0 0 100 100"><circle cx="50" cy="32" r="16" fill="#e0c097"/><path d="M30 85 C30 55, 70 55, 70 85 Z" fill="#2f7532"/><path d="M25 20 Q60 50 25 80" stroke="#8d5b4c" stroke-width="6" fill="none"/><line x1="25" y1="20" x2="25" y2="80" stroke="#eee" stroke-width="2"/></svg>`,
-            crossbowman: `<svg class="unit-svg" viewBox="0 0 100 100"><path d="M30 85 C30 55, 70 55, 70 85 Z" fill="#3b4a3f"/><circle cx="50" cy="32" r="16" fill="#d2b48c"/><rect x="20" y="45" width="60" height="8" fill="#5c4033"/><rect x="46" y="20" width="8" height="50" fill="#708090"/></svg>`,
-            arbalester: `<svg class="unit-svg" viewBox="0 0 100 100"><path d="M30 85 C30 55, 70 55, 70 85 Z" fill="#2c3e50"/><circle cx="50" cy="32" r="16" fill="#e2e8f0"/><rect x="15" y="42" width="70" height="10" fill="#4a5568"/><rect x="45" y="15" width="10" height="60" fill="#cbd5e0"/></svg>`,
-            knight: `<svg class="unit-svg" viewBox="0 0 100 100"><path d="M25 85 C25 45, 75 45, 75 85 Z" fill="#718096"/><rect x="35" y="20" width="30" height="30" rx="5" fill="#cbd5e0"/><rect x="40" y="30" width="20" height="4" fill="#1a202c"/><path d="M50 5 L60 20 L40 20 Z" fill="#e53e3e"/></svg>`,
-            cavalier: `<svg class="unit-svg" viewBox="0 0 100 100"><path d="M20 85 C20 40, 80 40, 80 85 Z" fill="#2b6cb0"/><rect x="32" y="15" width="36" height="35" rx="5" fill="#e2e8f0"/><polygon points="50,2 65,18 35,18" fill="#dd6b20"/><rect x="38" y="28" width="24" height="5" fill="#1a202c"/></svg>`,
-            paladin: `<svg class="unit-svg" viewBox="0 0 100 100"><path d="M15 85 C15 35, 85 35, 85 85 Z" fill="#d69e2e"/><rect x="30" y="12" width="40" height="38" rx="6" fill="#f7fafc"/><path d="M50 0 L68 18 L32 18 Z" fill="#b83232"/><rect x="36" y="25" width="28" height="6" fill="#742a2a"/><circle cx="50" cy="60" r="8" fill="#d69e2e"/></svg>`,
-            gbeto: `<svg class="unit-svg" viewBox="0 0 100 100"><circle cx="50" cy="32" r="16" fill="#c29b61"/><path d="M25 85 C25 50, 75 50, 75 85 Z" fill="#991b1b"/><path d="M20 40 L40 20 L50 30 L30 50 Z" fill="#fbbf24"/><path d="M65 35 L80 50" stroke="#f59e0b" stroke-width="4" stroke-linecap="round"/></svg>`,
-            teutonic: `<svg class="unit-svg" viewBox="0 0 100 100"><path d="M15 85 C15 30, 85 30, 85 85 Z" fill="#1e293b"/><rect x="32" y="15" width="36" height="36" rx="4" fill="#f8fafc"/><rect x="42" y="25" width="16" height="4" fill="#000"/><rect x="48" y="20" width="4" height="16" fill="#000"/><path d="M50 5 L60 15 L40 15 Z" fill="#b91c1c"/></svg>`,
-            boyar: `<svg class="unit-svg" viewBox="0 0 100 100"><path d="M20 85 C20 40, 80 40, 80 85 Z" fill="#991b1b"/><circle cx="50" cy="30" r="16" fill="#fcd34d"/><path d="M30 15 L70 15 L60 2 Z" fill="#78350f"/><rect x="35" y="45" width="30" height="8" fill="#d97706"/></svg>`,
-            arambai: `<svg class="unit-svg" viewBox="0 0 100 100"><path d="M25 85 C25 45, 75 45, 75 85 Z" fill="#065f46"/><circle cx="50" cy="32" r="16" fill="#e0c097"/><path d="M15 25 L35 10 L40 40 Z" fill="#dc2626"/><path d="M60 40 L85 25 L65 10 Z" fill="#dc2626"/></svg>`,
-            war_elephant: `<svg class="unit-svg" viewBox="0 0 100 100"><path d="M10 85 Q10 30 50 30 Q90 30 90 85 Z" fill="#475569"/><circle cx="30" cy="45" r="5" fill="#000"/><path d="M20 60 Q5 70 15 85" stroke="#f8fafc" stroke-width="6" fill="none"/><rect x="35" y="10" width="30" height="20" rx="3" fill="#b91c1c" stroke="#f5c842" stroke-width="2"/></svg>`,
-            elephant_archer: `<svg class="unit-svg" viewBox="0 0 100 100"><path d="M10 85 Q10 30 50 30 Q90 30 90 85 Z" fill="#334155"/><circle cx="30" cy="45" r="5" fill="#000"/><path d="M20 60 Q5 70 15 85" stroke="#f8fafc" stroke-width="6" fill="none"/><path d="M40 5 L60 25 M60 5 L40 25" stroke="#eab308" stroke-width="3"/><rect x="35" y="10" width="30" height="15" fill="#854d0e"/></svg>`,
-            jaguar: `<svg class="unit-svg" viewBox="0 0 100 100"><circle cx="50" cy="32" r="16" fill="#d97706"/><path d="M25 85 C25 45, 75 45, 75 85 Z" fill="#78350f"/><circle cx="45" cy="28" r="2" fill="#000"/><circle cx="55" cy="28" r="2" fill="#000"/><path d="M30 15 L50 2 L70 15 Z" fill="#b45309"/></svg>`,
-            samurai: `<svg class="unit-svg" viewBox="0 0 100 100"><path d="M20 85 C20 40, 80 40, 80 85 Z" fill="#991b1b"/><rect x="30" y="18" width="40" height="30" fill="#1e293b"/><path d="M20 18 Q50 5 80 18 L50 10 Z" fill="#f5c842"/><rect x="48" y="30" width="4" height="50" fill="#e2e8f0"/></svg>`,
-            longbowman: `<svg class="unit-svg" viewBox="0 0 100 100"><circle cx="50" cy="30" r="16" fill="#e0c097"/><path d="M25 85 C25 50, 75 50, 75 85 Z" fill="#15803d"/><path d="M15 10 Q70 50 15 90" stroke="#854d0e" stroke-width="5" fill="none"/><line x1="15" y1="10" x2="15" y2="90" stroke="#fff" stroke-width="2"/></svg>`,
-            conquistador: `<svg class="unit-svg" viewBox="0 0 100 100"><path d="M15 85 C15 35, 85 35, 85 85 Z" fill="#1e3a8a"/><rect x="32" y="18" width="36" height="30" rx="4" fill="#cbd5e0"/><path d="M20 18 C30 5, 70 5, 80 18 Z" fill="#f5c842"/><rect x="65" y="40" width="30" height="8" fill="#475569"/></svg>`
+        // ИГРОВОЕ СОСТОЯНИЕ
+        let currentFaction = 'Франки';
+        let currentEra = 1;
+
+        let resources = {
+            food: 100,
+            wood: 100,
+            stone: 0,
+            iron: 0,
+            gold: 0
         };
 
-        const EVOLUTION_STAGES = [
-            { id: 'militia', minTaps: 0, name: 'Ополченец', age: 'Темные Века', basePower: 1, icon: UNIT_SVGS.militia, nextMilestone: 50, nextName: 'Мечник' },
-            { id: 'swordsman', minTaps: 50, name: 'Мечник', age: 'Темные Века', basePower: 3, icon: UNIT_SVGS.swordsman, nextMilestone: 200, nextName: 'Лучник' },
-            { id: 'archer', minTaps: 200, name: 'Лучник', age: 'Феодальная Эпоха', basePower: 10, icon: UNIT_SVGS.archer, nextMilestone: 500, nextName: 'Самострельщик' },
-            { id: 'crossbowman', minTaps: 500, name: 'Самострельщик', age: 'Замковая Эпоха', basePower: 25, icon: UNIT_SVGS.crossbowman, nextMilestone: 750, nextName: 'Арбалетчик' },
-            { id: 'arbalester', minTaps: 750, name: 'Арбалетчик', age: 'Замковая Эпоха', basePower: 50, icon: UNIT_SVGS.arbalester, nextMilestone: 1000, nextName: 'Рыцарь' },
-            { id: 'knight', minTaps: 1000, name: 'Рыцарь', age: 'Имперская Эпоха', basePower: 120, icon: UNIT_SVGS.knight, nextMilestone: 2000, nextName: 'Кавалер' },
-            { id: 'cavalier', minTaps: 2000, name: 'Кавалер', age: 'Имперская Эпоха', basePower: 300, icon: UNIT_SVGS.cavalier, nextMilestone: 5000, nextName: 'Паладин' },
-            { id: 'paladin', minTaps: 5000, name: 'Паладин', age: 'Легендарная Эпоха', basePower: 1000, icon: UNIT_SVGS.paladin, nextMilestone: 7500, nextName: 'Гбето' },
-            { id: 'gbeto', minTaps: 7500, name: 'Гбето', age: 'Эпоха Династий', basePower: 2500, icon: UNIT_SVGS.gbeto, nextMilestone: 10000, nextName: 'Тевтонский рыцарь' },
-            { id: 'teutonic', minTaps: 10000, name: 'Тевтонский рыцарь', age: 'Эпоха Крестоносцев', basePower: 6000, icon: UNIT_SVGS.teutonic, nextMilestone: 15000, nextName: 'Боярин' },
-            { id: 'boyar', minTaps: 15000, name: 'Боярин', age: 'Эпоха Княжеств', basePower: 12000, icon: UNIT_SVGS.boyar, nextMilestone: 20000, nextName: 'Арамбай' },
-            { id: 'arambai', minTaps: 20000, name: 'Арамбай', age: 'Эпоха Востока', basePower: 25000, icon: UNIT_SVGS.arambai, nextMilestone: 25000, nextName: 'Боевой слон' },
-            { id: 'war_elephant', minTaps: 25000, name: 'Боевой слон', age: 'Эпоха Империй', basePower: 50000, icon: UNIT_SVGS.war_elephant, nextMilestone: 30000, nextName: 'Лучник на слоне' },
-            { id: 'elephant_archer', minTaps: 30000, name: 'Лучник на слоне', age: 'Индийская Эпоха', basePower: 100000, icon: UNIT_SVGS.elephant_archer, nextMilestone: 35000, nextName: 'Воин-ягуар' },
-            { id: 'jaguar', minTaps: 35000, name: 'Воин-ягуар', age: 'Ацтекская Эпоха', basePower: 200000, icon: UNIT_SVGS.jaguar, nextMilestone: 40000, nextName: 'Самурай' },
-            { id: 'samurai', minTaps: 40000, name: 'Самурай', age: 'Эпоха Сёгуната', basePower: 450000, icon: UNIT_SVGS.samurai, nextMilestone: 45000, nextName: 'Британский лучник' },
-            { id: 'longbowman', minTaps: 45000, name: 'Британский лучник', age: 'Британская Эпоха', basePower: 1000000, icon: UNIT_SVGS.longbowman, nextMilestone: 50000, nextName: 'Конкистадор' },
-            { id: 'conquistador', minTaps: 50000, name: 'Конкистадор', age: 'Эпоха Великих Открытий', basePower: 2500000, icon: UNIT_SVGS.conquistador, nextMilestone: null, nextName: 'MAX' }
-        ];
+        let isWorking = false;
+        let isPaused = false;
+        let workforceCount = 5;
+        let maxPopulation = 10;
+        let workerCost = 50.0;
+        const ABSOLUTE_MAX_POPULATION = 200;
+        
+        // Здания
+        let houses = 0;
+        let palisades = 0;
+        let outposts = 0;
+        let farms = 0;
+        let sawmills = 0;
+        let quarries = 0;
+        let ports = 0;
+        let barracks = 0;
+        let archery = 0;
+        let stables = 0;
+        let monasteries = 0;
+        let forges = 0;
+        let castles = 0;
 
-        const UPGRADES_DATA = [
-            { id: 'loom', name: 'Ткацкий станок', desc: '+1 к клику', baseCost: 15, costMult: 1.4, value: 1, type: 'power' },
-            { id: 'forging', name: 'Ковка', desc: '+4 к клику', baseCost: 50, costMult: 1.45, value: 4, type: 'power' },
-            { id: 'fletching', name: 'Оперение стрел', desc: '+12 к клику', baseCost: 200, costMult: 1.5, value: 12, type: 'power' },
-            { id: 'iron_casting', name: 'Отливка железа', desc: '+35 к клику', baseCost: 800, costMult: 1.55, value: 35, type: 'power' },
-            { id: 'bodkin_arrow', name: 'Стрела Бодкин', desc: '+100 к клику', baseCost: 2500, costMult: 1.6, value: 100, type: 'power' },
-            { id: 'blast_furnace', name: 'Доменная печь', desc: '+300 к клику', baseCost: 8000, costMult: 1.65, value: 300, type: 'power' },
-            { id: 'double_tap', name: 'Двойной удар', desc: '+1 тап за клик', baseCost: 25000, costMult: 2.0, value: 1, type: 'taps' }
-        ];
-
-        let gameState = {
-            taps: 0,
-            gold: 0,
-            upgrades: {}
+        // Исследования Кузницы
+        let upgrades = {
+            forging: false,
+            scaleMail: false,
+            fletching: false,
+            paddedArcher: false,
+            scaleBarding: false
         };
 
-        function getCurrentStage() {
-            let current = EVOLUTION_STAGES[0];
-            for (let i = 0; i < EVOLUTION_STAGES.length; i++) {
-                if (gameState.taps >= EVOLUTION_STAGES[i].minTaps) {
-                    current = EVOLUTION_STAGES[i];
+        // Рейдеры и Опасный период
+        let raidTimer = 60;
+        let dangerPeriodCycle = 180;
+        let isDangerPeriod = false;
+        let dangerPeriodTimer = 0;
+        let nextRandomRaidTimer = 0;
+
+        // ЧИТ-КОДЫ
+        let cheatInputBuffer = "";
+        const ADMIN_CHEAT_CODE = "kuvshin12345789";
+
+        // ИНИЦИАЛИЗАЦИЯ
+        window.onload = () => {
+            initCanvas();
+            applyFactionBonuses();
+            updateUI();
+            setInterval(gameTick, 1000);
+
+            // Слушатели клавиш (Пауза и Чит-коды)
+            window.addEventListener('keydown', (e) => {
+                if (e.key === 'F3' || e.keyCode === 114) {
+                    e.preventDefault();
+                    togglePause();
                 }
-            }
-            return current;
-        }
 
-        function getTapsPerClick() {
-            const extraTaps = gameState.upgrades['double_tap'] || 0;
-            return 1 + extraTaps;
-        }
-
-        function getClickPower() {
-            const stage = getCurrentStage();
-            let bonusPower = 0;
-            UPGRADES_DATA.forEach(upg => {
-                if (upg.type === 'power') {
-                    const lvl = gameState.upgrades[upg.id] || 0;
-                    bonusPower += upg.value * lvl;
+                // Буфер клавиатуры для чит-кода
+                if (e.key && e.key.length === 1) {
+                    cheatInputBuffer += e.key.toLowerCase();
+                    if (cheatInputBuffer.length > 30) {
+                        cheatInputBuffer = cheatInputBuffer.slice(-30);
+                    }
+                    if (cheatInputBuffer.includes(ADMIN_CHEAT_CODE)) {
+                        activateAdminCheat();
+                        cheatInputBuffer = "";
+                    }
                 }
             });
-            return stage.basePower + bonusPower;
-        }
+        };
 
-        function handleClick() {
-            const tapsGained = getTapsPerClick();
-            const powerPerTap = getClickPower();
-            const totalGoldGained = powerPerTap * tapsGained;
+        function activateAdminCheat() {
+            resources.food += 100000;
+            resources.wood += 100000;
+            resources.stone += 100000;
+            resources.iron += 100000;
+            resources.gold += 100000;
 
-            gameState.taps += tapsGained;
-            gameState.gold += totalGoldGained;
+            const banner = document.getElementById('raid-result-banner');
+            banner.classList.remove('hidden');
+            banner.className = "w-full py-2 px-4 rounded-xl text-xs font-bold bg-amber-500/20 border border-amber-500 text-amber-300";
+            banner.innerHTML = `👑 <b>РЕЖИМ БЕСКОНЕЧНЫХ РЕСУРСОВ АКТИВИРОВАН!</b> Добавлено по 100,000 каждого ресурса.`;
 
-            spawnFloatText(`+${totalGoldGained.toLocaleString()} 🪙 (${tapsGained} тапа)`);
+            setTimeout(() => {
+                banner.classList.add('hidden');
+            }, 5000);
+
             updateUI();
-            saveToStorage();
         }
 
-        function spawnFloatText(text) {
-            const btn = document.getElementById('mainClickBtn');
+        function applyFactionBonuses() {
+            const farmDesc = document.getElementById('farm-bonus-desc');
+            if (currentFaction === 'Франки') {
+                farmDesc.textContent = "+7 пищи/сек (Бонус Франков)";
+            } else {
+                farmDesc.textContent = "+5 пищи/сек";
+            }
+        }
+
+        // ПЕРЕХОД ВО II ЭПОХУ (1000 Дерева, 1000 Пищи)
+        function advanceToEra2() {
+            if (isPaused) return;
+            if (resources.wood >= 1000 && resources.food >= 1000) {
+                resources.wood -= 1000;
+                resources.food -= 1000;
+                currentEra = 2;
+
+                // Разблокировка Камня и Золота
+                const boxStone = document.getElementById('box-res-stone');
+                boxStone.classList.remove('locked-resource');
+                boxStone.title = "Доступно во II Эпохе";
+                document.getElementById('icon-res-stone').className = "fa-solid fa-cubes text-gray-400 text-lg";
+
+                const boxGold = document.getElementById('box-res-gold');
+                boxGold.classList.remove('locked-resource');
+                boxGold.title = "Доступно во II Эпохе";
+                document.getElementById('icon-res-gold').className = "fa-solid fa-coins text-amber-400 text-lg";
+                document.getElementById('res-gold').className = "font-bold text-amber-400 text-sm";
+                document.getElementById('res-gold').textContent = resources.gold.toFixed(1);
+
+                // Разблокировка на Рынке
+                document.getElementById('opt-give-stone').disabled = false;
+                document.getElementById('opt-give-stone').textContent = "Камень";
+                document.getElementById('opt-get-stone').disabled = false;
+                document.getElementById('opt-get-stone').textContent = "Камень";
+
+                document.getElementById('opt-give-gold').disabled = false;
+                document.getElementById('opt-give-gold').textContent = "Золото";
+                document.getElementById('opt-get-gold').disabled = false;
+                document.getElementById('opt-get-gold').textContent = "Золото";
+
+                // Переключение отображения построек II Эпохи
+                document.getElementById('era-advance-card').classList.add('hidden');
+                document.getElementById('era2-buildings-title').classList.remove('hidden');
+                document.getElementById('card-barracks-build').classList.remove('hidden');
+                document.getElementById('card-archery-build').classList.remove('hidden');
+                document.getElementById('card-stables-build').classList.remove('hidden');
+                document.getElementById('card-monastery-build').classList.remove('hidden');
+                document.getElementById('card-forge-build').classList.remove('hidden');
+                document.getElementById('card-castle-build').classList.remove('hidden');
+
+                // Изменение названия и иконки города
+                document.getElementById('era-indicator').textContent = "Эпоха: Древний мир (II)";
+                document.getElementById('settlement-name').textContent = "Древний Город";
+                document.getElementById('settlement-icon').className = "fa-solid fa-chess-rook text-5xl text-amber-500";
+                document.getElementById('settlement-desc').textContent = "Ваше поселение развилось во II Эпоху! Теперь вам доступны военные постройки, кузница и замки.";
+
+                updateUI();
+            }
+        }
+
+        // ПОКУПКА ИССЛЕДОВАНИЙ В КУЗНИЦЕ
+        function buyUpgrade(type, foodCost, woodCost, goldCost) {
+            if (isPaused) return;
+            if (upgrades[type]) return;
+
+            if (resources.food >= foodCost && resources.wood >= woodCost && resources.gold >= goldCost) {
+                resources.food -= foodCost;
+                resources.wood -= woodCost;
+                resources.gold -= goldCost;
+                upgrades[type] = true;
+                updateUI();
+            }
+        }
+
+        // ОБМЕН НА РЫНКЕ
+        function executeTrade() {
+            if (isPaused) return;
+            const giveRes = document.getElementById('market-give').value;
+            const getRes = document.getElementById('market-get').value;
+
+            if (giveRes === getRes) return;
+
+            if (resources[giveRes] >= 200) {
+                resources[giveRes] -= 200;
+                resources[getRes] += 100;
+                updateUI();
+            }
+        }
+
+        function updateMarketUI() {
+            const giveRes = document.getElementById('market-give').value;
+            const getRes = document.getElementById('market-get').value;
+            const tradeBtn = document.getElementById('btn-execute-trade');
+
+            if (giveRes === getRes || resources[giveRes] < 200) {
+                tradeBtn.disabled = true;
+            } else {
+                tradeBtn.disabled = false;
+            }
+        }
+
+        // ТОГГЛ ПАУЗЫ
+        function togglePause() {
+            isPaused = !isPaused;
+            const overlay = document.getElementById('pause-overlay');
+            if (isPaused) {
+                overlay.classList.remove('hidden');
+            } else {
+                overlay.classList.add('hidden');
+            }
+        }
+
+        // ВЫБОР ВКЛАДОК
+        function switchTab(tab) {
+            const tabs = ['workforce', 'buildings', 'market', 'forge', 'barracks', 'archery', 'stables', 'monastery'];
+            tabs.forEach(t => {
+                const btn = document.getElementById(`tab-${t}`);
+                const sec = document.getElementById(`section-${t}`);
+                if (btn && sec) {
+                    if (t === tab) {
+                        btn.className = "flex-1 py-2 px-2 rounded-xl font-semibold text-xs transition-all bg-amber-600 text-white shadow-lg";
+                        sec.classList.remove('hidden');
+                    } else {
+                        const isDisabled = btn.disabled;
+                        btn.className = `flex-1 py-2 px-2 rounded-xl font-semibold text-xs transition-all bg-black/40 ${isDisabled ? 'text-gray-500 border border-gray-800 cursor-not-allowed opacity-50' : 'text-gray-400 hover:text-white border border-amber-900/30'}`;
+                        sec.classList.add('hidden');
+                    }
+                }
+            });
+        }
+
+        // ВКЛЮЧЕНИЕ / ВЫКЛЮЧЕНИЕ РАБОЧЕЙ СИЛЫ
+        function toggleWorkforce() {
+            if (isPaused) return;
+            isWorking = !isWorking;
+            updateWorkforceCard();
+        }
+
+        function updateWorkforceCard() {
+            const card = document.getElementById('workforce-card');
+            const statusBtn = document.getElementById('card-status-btn');
+            const statusSettlement = document.getElementById('settlement-status');
+
+            if (isWorking) {
+                card.classList.add('card-active');
+                statusBtn.className = "w-full py-2 rounded-lg text-center font-bold text-sm bg-amber-600 text-white border border-amber-400 transition-all shadow-md";
+                statusBtn.innerHTML = '<i class="fa-solid fa-play text-xs mr-1"></i> Работают (Опасность при рейде!)';
+                statusSettlement.textContent = "Добыча ресурсов...";
+                statusSettlement.className = "text-amber-400 font-bold";
+            } else {
+                card.classList.remove('card-active');
+                statusBtn.className = "w-full py-2 rounded-lg text-center font-bold text-sm bg-gray-800 text-gray-300 border border-gray-700 transition-all";
+                statusBtn.innerHTML = '<i class="fa-solid fa-pause text-xs mr-1"></i> Не работают (В безопасности)';
+                statusSettlement.textContent = "Отдых";
+                statusSettlement.className = "text-gray-400";
+            }
+        }
+
+        // НАЙМ РАБОЧЕГО (+2 к стоимости)
+        function buyWorker() {
+            if (isPaused) return;
+            if (workforceCount >= maxPopulation || workforceCount >= ABSOLUTE_MAX_POPULATION) return;
+
+            if (resources.food >= workerCost) {
+                resources.food -= workerCost;
+                workforceCount += 1;
+                workerCost += 2.0;
+                updateUI();
+            }
+        }
+
+        // ПОСТРОЙКА ЧАСТОКОЛА (200 дерева)
+        function buyPalisade() {
+            if (isPaused) return;
+            if (resources.wood >= 200) {
+                resources.wood -= 200;
+                palisades += 1;
+                updateUI();
+            }
+        }
+
+        // ПОСТРОЙКА АВАНПОСТА (500 дерева, максимум 1)
+        function buyOutpost() {
+            if (isPaused) return;
+            if (outposts >= 1) return;
+            if (resources.wood >= 500) {
+                resources.wood -= 500;
+                outposts = 1;
+                updateUI();
+            }
+        }
+
+        // ПОСТРОЙКА ДОМА (300 дерева, макс. лимит 200)
+        function buyHouse() {
+            if (isPaused) return;
+            if (maxPopulation >= ABSOLUTE_MAX_POPULATION) return;
+            if (resources.wood >= 300) {
+                resources.wood -= 300;
+                houses += 1;
+                maxPopulation = Math.min(ABSOLUTE_MAX_POPULATION, maxPopulation + 2);
+                updateUI();
+            }
+        }
+
+        // ПОСТРОЙКА ФЕРМЫ
+        function buyFarm() {
+            if (isPaused) return;
+            if (resources.wood >= 250) {
+                resources.wood -= 250;
+                farms += 1;
+                updateUI();
+            }
+        }
+
+        // ПОСТРОЙКА ЛЕСОПИЛКИ
+        function buySawmill() {
+            if (isPaused) return;
+            if (resources.wood >= 500) {
+                resources.wood -= 500;
+                sawmills += 1;
+                updateUI();
+            }
+        }
+
+        // ПОСТРОЙКА КАМЕНОЛОМНИ (400 дерева, дает +3 камня при постройке)
+        function buyQuarry() {
+            if (isPaused) return;
+            if (resources.wood >= 400) {
+                resources.wood -= 400;
+                quarries += 1;
+                resources.stone += 3;
+                updateUI();
+            }
+        }
+
+        // ПОСТРОЙКА ПОРТА (1000 дерева)
+        function buyPort() {
+            if (isPaused) return;
+            if (resources.wood >= 1000) {
+                resources.wood -= 1000;
+                ports += 1;
+                updateUI();
+            }
+        }
+
+        // ПОСТРОЙКА КАЗАРМЫ (900 дерева, макс 1)
+        function buyBarracks() {
+            if (isPaused) return;
+            if (currentEra < 2 || barracks >= 1) return;
+            if (resources.wood >= 900) {
+                resources.wood -= 900;
+                barracks = 1;
+                unlockBuildingTab('tab-barracks');
+                updateUI();
+            }
+        }
+
+        // ПОСТРОЙКА СТРЕЛЬБИЩА (900 дерева, макс 1)
+        function buyArchery() {
+            if (isPaused) return;
+            if (currentEra < 2 || archery >= 1) return;
+            if (resources.wood >= 900) {
+                resources.wood -= 900;
+                archery = 1;
+                unlockBuildingTab('tab-archery');
+                updateUI();
+            }
+        }
+
+        // ПОСТРОЙКА КОНЮШНИ (900 дерева, макс 1)
+        function buyStables() {
+            if (isPaused) return;
+            if (currentEra < 2 || stables >= 1) return;
+            if (resources.wood >= 900) {
+                resources.wood -= 900;
+                stables = 1;
+                unlockBuildingTab('tab-stables');
+                updateUI();
+            }
+        }
+
+        // ПОСТРОЙКА МОНАСТЫРЯ (1500 дерева, макс 1)
+        function buyMonastery() {
+            if (isPaused) return;
+            if (currentEra < 2 || monasteries >= 1) return;
+            if (resources.wood >= 1500) {
+                resources.wood -= 1500;
+                monasteries = 1;
+                unlockBuildingTab('tab-monastery');
+                updateUI();
+            }
+        }
+
+        // ПОСТРОЙКА КУЗНИЦЫ (800 дерева, 500 камня, макс 1)
+        function buyForge() {
+            if (isPaused) return;
+            if (currentEra < 2 || forges >= 1) return;
+            if (resources.wood >= 800 && resources.stone >= 500) {
+                resources.wood -= 800;
+                resources.stone -= 500;
+                forges = 1;
+                unlockBuildingTab('tab-forge');
+                updateUI();
+            }
+        }
+
+        function unlockBuildingTab(tabId) {
+            const tab = document.getElementById(tabId);
+            if (tab) {
+                tab.disabled = false;
+                tab.classList.remove('opacity-50', 'cursor-not-allowed', 'text-gray-500');
+                tab.classList.add('text-gray-400', 'hover:text-white');
+            }
+        }
+
+        // ПОСТРОЙКА ЗАМКА (1700 камня, 3000 дерева, макс 1)
+        function buyCastle() {
+            if (isPaused) return;
+            if (currentEra < 2 || castles >= 1) return;
+            if (resources.stone >= 1700 && resources.wood >= 3000) {
+                resources.stone -= 1700;
+                resources.wood -= 3000;
+                castles = 1;
+                updateUI();
+            }
+        }
+
+        // ИГРОВОЙ ТАКТ (КАЖДУЮ СЕКУНДУ)
+        function gameTick() {
+            if (isPaused) return;
+
+            // Только если рабочие активны
+            if (isWorking && workforceCount > 0) {
+                const baseIncome = workforceCount * 0.5;
+                resources.food += baseIncome;
+                resources.wood += baseIncome;
+
+                if (currentEra >= 2) {
+                    resources.stone += baseIncome;
+                    resources.gold += baseIncome * 0.2;
+                }
+
+                const farmYield = (currentFaction === 'Франки') ? 7 : 5;
+                resources.food += farms * farmYield;
+                resources.wood += sawmills * 10;
+                resources.stone += quarries * 8;
+                resources.food += ports * 15;
+            }
+
+            // ЛОГИКА ТАЙМЕРОВ И РЕЙДЕРОВ
+            if (!isDangerPeriod) {
+                raidTimer--;
+                dangerPeriodCycle--;
+
+                if (dangerPeriodCycle <= 0) {
+                    isDangerPeriod = true;
+                    dangerPeriodTimer = 40;
+                    nextRandomRaidTimer = Math.floor(Math.random() * 16) + 5;
+                    document.getElementById('main-header').classList.add('danger-period-active');
+                } else if (raidTimer <= 0) {
+                    triggerRaid();
+                    raidTimer = 60;
+                }
+            } else {
+                dangerPeriodTimer--;
+                nextRandomRaidTimer--;
+
+                if (nextRandomRaidTimer <= 0) {
+                    triggerRaid();
+                    nextRandomRaidTimer = Math.floor(Math.random() * 16) + 5;
+                }
+
+                if (dangerPeriodTimer <= 0) {
+                    isDangerPeriod = false;
+                    dangerPeriodCycle = 180;
+                    raidTimer = 60;
+                    document.getElementById('main-header').classList.remove('danger-period-active');
+                }
+            }
+
+            updateUI();
+        }
+
+        // АТАКА РЕЙДЕРОВ
+        function triggerRaid() {
+            const banner = document.getElementById('raid-result-banner');
+            banner.classList.remove('hidden');
+
+            if (isWorking) {
+                const casualtyRate = palisades > 0 ? 0.25 : 0.5;
+                const killed = Math.ceil(workforceCount * casualtyRate);
+                workforceCount = Math.max(0, workforceCount - killed);
+                
+                banner.className = "w-full py-2 px-4 rounded-xl text-xs font-bold bg-red-950/80 border border-red-600 text-red-200";
+                if (palisades > 0) {
+                    banner.innerHTML = `🛡️🚨 <b>Частокол защитил часть людей!</b> Вы не отключили работу. Погибло <b>${killed}</b> рабочих (25%).`;
+                } else {
+                    banner.innerHTML = `🚨 <b>Нападение рейдеров!</b> Вы не отключили работу. Погибло <b>${killed}</b> рабочих (50%)!`;
+                }
+            } else {
+                banner.className = "w-full py-2 px-4 rounded-xl text-xs font-bold bg-emerald-950/80 border border-emerald-600 text-emerald-200";
+                banner.innerHTML = `🛡️ <b>Рейдеры прошли мимо!</b> Ваши рабочие прятались и остались невредимы.`;
+            }
+
+            setTimeout(() => {
+                banner.classList.add('hidden');
+            }, 4000);
+
+            updateWorkforceCard();
+        }
+
+        // ОБНОВЛЕНИЕ ИНТЕРФЕЙСА
+        function updateUI() {
+            document.getElementById('res-food').textContent = resources.food.toFixed(1);
+            document.getElementById('res-wood').textContent = resources.wood.toFixed(1);
+
+            if (currentEra >= 2) {
+                document.getElementById('res-stone').textContent = resources.stone.toFixed(1);
+                document.getElementById('res-gold').textContent = resources.gold.toFixed(1);
+            }
+
+            // Население
+            document.getElementById('res-pop').textContent = `${workforceCount}/${maxPopulation}`;
+
+            // Переход во II эпохи
+            const btnAdvance = document.getElementById('btn-advance-era');
+            if (btnAdvance) {
+                btnAdvance.disabled = (resources.wood < 1000 || resources.food < 1000);
+            }
+
+            // Карточки рабочих
+            document.getElementById('workforce-count').textContent = `${workforceCount} чел.`;
+            document.getElementById('worker-cost-text').textContent = workerCost.toFixed(1);
+            
+            const buyWorkerBtn = document.getElementById('buy-worker-btn');
+            if (workforceCount >= maxPopulation || workforceCount >= ABSOLUTE_MAX_POPULATION) {
+                buyWorkerBtn.disabled = true;
+                buyWorkerBtn.textContent = "Лимит лим.";
+            } else {
+                buyWorkerBtn.disabled = resources.food < workerCost;
+                buyWorkerBtn.textContent = "+1 Рабочий";
+            }
+
+            // Здания I Эпохи
+            document.getElementById('palisade-count').textContent = `${palisades} шт.`;
+            document.getElementById('buy-palisade-btn').disabled = resources.wood < 200;
+
+            document.getElementById('outpost-count').textContent = `${outposts} / 1 шт.`;
+            const buyOutpostBtn = document.getElementById('buy-outpost-btn');
+            if (outposts >= 1) {
+                buyOutpostBtn.disabled = true;
+                buyOutpostBtn.textContent = "Построено";
+            } else {
+                buyOutpostBtn.disabled = resources.wood < 500;
+                buyOutpostBtn.textContent = "Построить";
+            }
+
+            document.getElementById('house-count').textContent = `${houses} шт.`;
+            const buyHouseBtn = document.getElementById('buy-house-btn');
+            if (maxPopulation >= ABSOLUTE_MAX_POPULATION) {
+                buyHouseBtn.disabled = true;
+                buyHouseBtn.textContent = "Макс. 200";
+            } else {
+                buyHouseBtn.disabled = resources.wood < 300;
+                buyHouseBtn.textContent = "Построить";
+            }
+
+            document.getElementById('farm-count').textContent = `${farms} шт.`;
+            document.getElementById('buy-farm-btn').disabled = resources.wood < 250;
+
+            document.getElementById('sawmill-count').textContent = `${sawmills} шт.`;
+            document.getElementById('buy-sawmill-btn').disabled = resources.wood < 500;
+
+            document.getElementById('quarry-count').textContent = `${quarries} шт.`;
+            document.getElementById('buy-quarry-btn').disabled = resources.wood < 400;
+
+            document.getElementById('port-count').textContent = `${ports} шт.`;
+            document.getElementById('buy-port-btn').disabled = resources.wood < 1000;
+
+            // Здания II Эпохи (с лимитом 1 шт.)
+            if (currentEra >= 2) {
+                updateSingleBuildingUI('forge-count', 'buy-forge-btn', forges, (resources.wood >= 800 && resources.stone >= 500));
+                updateSingleBuildingUI('barracks-count', 'buy-barracks-btn', barracks, (resources.wood >= 900));
+                updateSingleBuildingUI('archery-count', 'buy-archery-btn', archery, (resources.wood >= 900));
+                updateSingleBuildingUI('stables-count', 'buy-stables-btn', stables, (resources.wood >= 900));
+                updateSingleBuildingUI('monastery-count', 'buy-monastery-btn', monasteries, (resources.wood >= 1500));
+                updateSingleBuildingUI('castle-count', 'buy-castle-btn', castles, (resources.stone >= 1700 && resources.wood >= 3000));
+
+                // Кнопки Улучшений Кузницы
+                updateForgeUpgradeBtn('btn-upg-forging', 'forging', 150, 0, 0);
+                updateForgeUpgradeBtn('btn-upg-scale-mail', 'scaleMail', 100, 0, 0);
+                updateForgeUpgradeBtn('btn-upg-fletching', 'fletching', 100, 0, 50);
+                updateForgeUpgradeBtn('btn-upg-padded-archer', 'paddedArcher', 100, 0, 0);
+                updateForgeUpgradeBtn('btn-upg-scale-barding', 'scaleBarding', 150, 0, 0);
+            }
+
+            // Обновление кнопок рынка
+            updateMarketUI();
+
+            // Таймеры рейдеров
+            const raidTimerEl = document.getElementById('raid-timer');
+            const raidLabelEl = document.getElementById('raid-label');
+            const raidAlertEl = document.getElementById('raid-alert');
+
+            if (isDangerPeriod) {
+                raidLabelEl.textContent = "🚨 ОПАСНЫЙ ПЕРИОД!";
+                raidTimerEl.textContent = `Атака: ${nextRandomRaidTimer}с (${dangerPeriodTimer}с)`;
+                raidAlertEl.classList.remove('hidden');
+                raidAlertEl.textContent = "🚨 РЕЙДЕРЫ АТАКУЮТ СЕРИЯМИ!";
+            } else {
+                raidLabelEl.textContent = "Рейдеры через:";
+                raidTimerEl.textContent = `${raidTimer} с`;
+                
+                if (raidTimer <= 10) {
+                    raidAlertEl.classList.remove('hidden');
+                    raidAlertEl.textContent = "⚠️ Спрячьте рабочих!";
+                } else {
+                    raidAlertEl.classList.add('hidden');
+                }
+            }
+        }
+
+        function updateSingleBuildingUI(countId, btnId, countVar, canAfford) {
+            const countEl = document.getElementById(countId);
+            const btnEl = document.getElementById(btnId);
+
+            if (countEl) countEl.textContent = `${countVar} / 1 шт.`;
+            if (btnEl) {
+                if (countVar >= 1) {
+                    btnEl.disabled = true;
+                    btnEl.textContent = "Построено";
+                } else {
+                    btnEl.disabled = !canAfford;
+                    btnEl.textContent = "Построить";
+                }
+            }
+        }
+
+        function updateForgeUpgradeBtn(btnId, type, foodCost, woodCost, goldCost) {
+            const btn = document.getElementById(btnId);
             if (!btn) return;
 
-            const rect = btn.getBoundingClientRect();
-            const el = document.createElement('div');
-            el.className = 'float-text';
-            el.innerText = text;
-
-            const x = rect.left + rect.width / 2 + (Math.random() * 40 - 20);
-            const y = rect.top + rect.height / 2 + (Math.random() * 20 - 10);
-
-            el.style.left = `${x}px`;
-            el.style.top = `${y}px`;
-
-            document.body.appendChild(el);
-            setTimeout(() => el.remove(), 800);
-        }
-
-        function buyUpgrade(id) {
-            const upg = UPGRADES_DATA.find(u => u.id === id);
-            const lvl = gameState.upgrades[id] || 0;
-            if (lvl >= 20) return;
-
-            const cost = Math.floor(upg.baseCost * Math.pow(upg.costMult, lvl));
-            if (gameState.gold >= cost) {
-                gameState.gold -= cost;
-                gameState.upgrades[id] = lvl + 1;
-                updateUI();
-                saveToStorage();
-            }
-        }
-
-        function updateUI() {
-            document.getElementById('tapCount').innerText = gameState.taps.toLocaleString();
-            document.getElementById('goldCount').innerText = Math.floor(gameState.gold).toLocaleString();
-
-            const stage = getCurrentStage();
-            document.getElementById('currentAgeText').innerText = stage.age;
-            document.getElementById('playerLevelBadge').innerText = Math.min(20, Math.floor(gameState.taps / 2500) + 1);
-
-            document.getElementById('unitTitle').innerText = stage.name;
-            document.getElementById('btnUnitLabel').innerText = stage.name.toUpperCase();
-            
-            const tapsPerClick = getTapsPerClick();
-            document.getElementById('clickPowerText').innerText = `+${getClickPower().toLocaleString()} (х${tapsPerClick} тапов за клик)`;
-            document.getElementById('unitIconContainer').innerHTML = stage.icon;
-
-            const nextLabel = document.getElementById('nextUnitLabel');
-            const progressText = document.getElementById('progressText');
-            const progressBar = document.getElementById('progressBar');
-
-            if (stage.nextMilestone) {
-                const prev = stage.minTaps;
-                const prog = gameState.taps - prev;
-                const total = stage.nextMilestone - prev;
-                const pct = Math.min(100, Math.max(0, (prog / total) * 100));
-
-                nextLabel.innerText = `Прогресс до ${stage.nextName}`;
-                progressText.innerText = `${gameState.taps.toLocaleString()} / ${stage.nextMilestone.toLocaleString()} тапов`;
-                progressBar.style.width = `${pct}%`;
+            if (upgrades[type]) {
+                btn.disabled = true;
+                btn.textContent = "Изучено ✓";
+                btn.className = "bg-gray-800 text-emerald-400 px-3 py-1.5 rounded-lg text-xs font-bold border border-emerald-500/30 cursor-not-allowed";
             } else {
-                nextLabel.innerText = 'Максимальная эволюция (Конкистадор)';
-                progressText.innerText = `${gameState.taps.toLocaleString()} тапов`;
-                progressBar.style.width = '100%';
+                btn.disabled = (resources.food < foodCost || resources.wood < woodCost || resources.gold < goldCost);
+                btn.textContent = "Изучить";
+                btn.className = "btn-fire text-white px-3 py-1.5 rounded-lg text-xs font-bold";
+            }
+        }
+
+        // ОГНЕННЫЙ ФОН CANVAS
+        function initCanvas() {
+            const canvas = document.getElementById('bg-canvas');
+            const ctx = canvas.getContext('2d');
+            let width, height;
+            let particles = [];
+
+            function resize() {
+                width = canvas.width = window.innerWidth;
+                height = canvas.height = window.innerHeight;
             }
 
-            renderMedals();
-            renderUpgrades();
-        }
+            window.addEventListener('resize', resize);
+            resize();
 
-        /* РЕНДЕР МЕДАЛЕЙ */
-        function renderMedals() {
-            const container = document.getElementById('medalsGrid');
-            container.innerHTML = '';
-
-            EVOLUTION_STAGES.forEach(stage => {
-                const isUnlocked = gameState.taps >= stage.minTaps;
-                const slot = document.createElement('div');
-                slot.className = `medal-slot ${isUnlocked ? 'unlocked' : 'locked'}`;
-                
-                const tooltipText = isUnlocked 
-                    ? `Получено: ${stage.name}` 
-                    : `Заблокировано: ${stage.name} (${stage.minTaps.toLocaleString()} тапов)`;
-                slot.setAttribute('data-tooltip', tooltipText);
-
-                if (isUnlocked) {
-                    slot.innerHTML = stage.icon.replace('class="unit-svg"', 'class="medal-svg"');
-                } else {
-                    slot.innerHTML = '🔒';
+            class Particle {
+                constructor() { this.reset(); }
+                reset() {
+                    this.x = Math.random() * width;
+                    this.y = height + Math.random() * 20;
+                    this.size = Math.random() * 3 + 1;
+                    this.speedY = Math.random() * 1.5 + 0.5;
+                    this.speedX = (Math.random() - 0.5) * 0.5;
+                    this.opacity = Math.random() * 0.5 + 0.2;
                 }
-
-                container.appendChild(slot);
-            });
-        }
-
-        function renderUpgrades() {
-            const container = document.getElementById('upgradesList');
-            container.innerHTML = '';
-
-            UPGRADES_DATA.forEach(upg => {
-                const lvl = gameState.upgrades[upg.id] || 0;
-                const isMax = lvl >= 20;
-                const cost = isMax ? 0 : Math.floor(upg.baseCost * Math.pow(upg.costMult, lvl));
-                const canAfford = !isMax && gameState.gold >= cost;
-
-                const card = document.createElement('div');
-                card.className = 'upg-item';
-                card.innerHTML = `
-                    <div>
-                        <div style="font-weight: bold; font-size: 0.85rem; color: #fef08a;">
-                            ${upg.name} <span style="color: #d4af37; font-size: 0.75rem;">[${lvl}/20]</span>
-                        </div>
-                        <div style="font-size: 0.7rem; color: #a1a1aa;">${upg.desc}</div>
-                    </div>
-                    <button class="upg-btn" ${(!canAfford || isMax) ? 'disabled' : ''} onclick="buyUpgrade('${upg.id}')">
-                        ${isMax ? 'MAX' : cost.toLocaleString() + ' 🪙'}
-                    </button>
-                `;
-                container.appendChild(card);
-            });
-        }
-
-        const STORAGE_KEY = 'aoe2_clicker_standalone_save';
-
-        function saveToStorage() {
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(gameState));
-        }
-
-        function loadFromStorage() {
-            try {
-                const saved = localStorage.getItem(STORAGE_KEY);
-                if (saved) {
-                    const parsed = JSON.parse(saved);
-                    if (parsed && typeof parsed.taps === 'number') gameState = parsed;
+                update() {
+                    this.y -= this.speedY;
+                    this.x += this.speedX;
+                    if (this.y < 0) this.reset();
                 }
-            } catch(e){}
-        }
-
-        /* СОХРАНЕНИЕ В ФАЙЛ */
-        document.getElementById('exportBtn').addEventListener('click', () => {
-            saveToStorage();
-            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(gameState, null, 2));
-            const a = document.createElement('a');
-            a.setAttribute("href", dataStr);
-            a.setAttribute("download", `aoe2_save.json`);
-            document.body.appendChild(a);
-            a.click();
-            a.remove();
-        });
-
-        document.getElementById('importBtn').addEventListener('click', () => {
-            document.getElementById('fileInput').click();
-        });
-
-        document.getElementById('fileInput').addEventListener('change', (e) => {
-            const file = e.target.files[0];
-            if (!file) return;
-
-            const reader = new FileReader();
-            reader.onload = function(evt) {
-                try {
-                    const loaded = JSON.parse(evt.target.result);
-                    if (loaded && typeof loaded.taps === 'number') {
-                        gameState = loaded;
-                        saveToStorage();
-                        updateUI();
-                        alert('Сохранение успешно загружено из файла!');
-                    } else {
-                        alert('Ошибка: Файл не содержит данных сохранения!');
-                    }
-                } catch (err) {
-                    alert('Ошибка при чтении файла!');
+                draw() {
+                    ctx.fillStyle = `rgba(249, 115, 22, ${this.opacity})`;
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                    ctx.fill();
                 }
-            };
-            reader.readAsText(file);
-        });
-
-        document.getElementById('resetBtn').addEventListener('click', () => {
-            if (confirm('Сбросить весь прогресс?')) {
-                gameState = { taps: 0, gold: 0, upgrades: {} };
-                saveToStorage();
-                updateUI();
             }
-        });
 
-        document.getElementById('mainClickBtn').addEventListener('click', handleClick);
+            for (let i = 0; i < 50; i++) particles.push(new Particle());
 
-        loadFromStorage();
-        updateUI();
+            function animate() {
+                ctx.clearRect(0, 0, width, height);
+                particles.forEach(p => { p.update(); p.draw(); });
+                requestAnimationFrame(animate);
+            }
+            animate();
+        }
     </script>
 </body>
 </html>
